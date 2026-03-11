@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@anuradev/capacitor-background-mode": "^7.2.1",
+    "@capacitor-community/camera-preview": "^7.0.5",
     "@capacitor-community/keep-awake": "^6.0.0",
     "@capacitor/android": "^7.4.4",
     "@capacitor/app": "^7.1.0",
@@ -53,7 +54,9 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@react-google-maps/api": "^2.20.8",
+    "@rollup/rollup-linux-x64-gnu": "^4.59.0",
     "@tanstack/react-query": "^5.83.0",
+    "@types/three": "^0.183.1",
     "adhan": "^4.4.3",
     "axios": "^1.13.2",
     "canvas-confetti": "^1.9.4",
@@ -77,6 +80,7 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.183.2",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"
   },

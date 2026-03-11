@@ -10,4 +10,7 @@
     <string name="asr">Asr</string>
     <string name="maghrib">Maghrib</string>
     <string name="isha">Isha</string>
+    <string name="protection_status">System Protection</string>
+    <string name="next_prayer_label">Next: </string>
+    <string name="dhikr_progress_label">Dhikr: </string>
 </resources>

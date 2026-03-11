@@ -7,21 +7,21 @@ export const AUDIO_RETRY_CONFIG = {
     MAX_ATTEMPTS: 3,
     BASE_DELAY: 1000, // ms
     MAX_DELAY: 5000, // ms
-    TIMEOUT: 10000, // 10 seconds per request
+    TIMEOUT: 6000, // 6 seconds per request (3-6-9)
 } as const;
 
 // Cache configuration
 export const CACHE_CONFIG = {
-    MAX_SIZE_MB: 500,
+    MAX_SIZE_MB: 1152, // Multiples of 9 (1+1+5+2=9)
     AUDIO_CACHE_NAME: 'ibad-rahman-audio-cache',
-    CLEANUP_THRESHOLD_MB: 450, // Start cleanup at 90%
+    CLEANUP_THRESHOLD_MB: 1036, // Start cleanup roughly ~90% of 1152
     MAX_AGE_DAYS: 30,
 } as const;
 
 // Network configuration
 export const NETWORK_CONFIG = {
-    OFFLINE_CHECK_INTERVAL: 5000, // Check every 5 seconds
-    REQUEST_TIMEOUT: 10000,
+    OFFLINE_CHECK_INTERVAL: 6000, // Check every 6 seconds (3-6-9)
+    REQUEST_TIMEOUT: 6000, // 6 seconds
     SLOW_NETWORK_THRESHOLD: 3000, // Consider "slow" if takes > 3s
 } as const;
 

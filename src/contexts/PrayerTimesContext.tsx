@@ -204,7 +204,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
                     console.warn("Location fetch failed, using cache/defaults", error);
                     setLoading(false);
                 },
-                { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+                { enableHighAccuracy: false, timeout: 6000, maximumAge: 540000 } // 6 seconds timeout, 9 mins cache
             );
         }
     }, [calculatePrayerTimes, locationMode, manualLatitude, manualLongitude, prayerTimes]);
@@ -300,7 +300,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
         };
 
         calculateNextPrayer();
-        const interval = setInterval(calculateNextPrayer, 1000);
+        const interval = setInterval(calculateNextPrayer, 33000); // 33 seconds check interval (3+3=6, 3-6-9 harmony)
         return () => clearInterval(interval);
 
     }, [prayerTimes, t]);

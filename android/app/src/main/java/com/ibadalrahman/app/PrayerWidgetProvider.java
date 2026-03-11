@@ -34,6 +34,10 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
         String locationName = prefs.getString("locationName", "--");
         
         String nextPrayerName = prefs.getString("nextPrayerName", ""); 
+        
+        int dhikrProgress = prefs.getInt("dhikrProgress", 0);
+        String currentDhikr = prefs.getString("currentDhikr", "--");
+        int dhikrTarget = prefs.getInt("dhikrTarget", 0);
         // We will use nextPrayerName to decide which one to highlight
 
         // Construct the RemoteViews object
@@ -47,6 +51,15 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_isha_time, isha);
         
         views.setTextViewText(R.id.widget_hijri_date, hijriDate);
+
+        // Update Protection Status
+        String nextLabel = context.getString(R.string.next_prayer_label);
+        views.setTextViewText(R.id.widget_next_prayer_info, nextLabel + " " + nextPrayerName);
+        
+        views.setTextViewText(R.id.widget_current_dhikr, currentDhikr);
+        views.setTextViewText(R.id.widget_dhikr_count, dhikrProgress + "/" + dhikrTarget);
+        
+        views.setProgressBar(R.id.widget_dhikr_progress, dhikrTarget, dhikrProgress, false);
 
         // Colors
         int white = android.graphics.Color.WHITE;

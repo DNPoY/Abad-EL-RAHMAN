@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -138,7 +138,7 @@ const AzkarCategory = ({
               dhikr.reward,
               language
             )}
-            className={`p-6 transition-all duration-300 border-emerald-deep/5 ${isCardComplete ? "opacity-70 bg-gold-matte/10 border-gold-matte/20" : "bg-white hover:shadow-lg hover:-translate-y-1"
+            className={`p-6 transition-all duration-[369ms] border-emerald-deep/5 ${isCardComplete ? "opacity-70 bg-gold-matte/10 border-gold-matte/20" : "bg-white hover:shadow-lg hover:-translate-y-1"
               }`}
           >
             <div className="flex items-start justify-between mb-4">
@@ -247,7 +247,7 @@ const AzkarCategory = ({
                 }}
                 disabled={isPrimaryComplete}
                 aria-label={getAccessibleCountButtonLabel(currentCount, dhikr.count, isPrimaryComplete, language)}
-                className={`flex-1 h-auto whitespace-normal py-3 active:scale-95 transition-transform border border-emerald-deep/10 ${isPrimaryComplete
+                className={`flex-1 h-auto whitespace-normal py-3 active:scale-[0.96] transition-transform border border-emerald-deep/10 ${isPrimaryComplete
                   ? "bg-transparent text-emerald-deep/40 shadow-none"
                   : "bg-emerald-deep text-white hover:bg-emerald-light shadow-md"
                   }`}
@@ -266,7 +266,7 @@ const AzkarCategory = ({
                     incrementCount(dhikr.id, dhikr.secondaryCount);
                   }}
                   disabled={currentCount >= dhikr.secondaryCount}
-                  className={`flex-1 h-auto whitespace-normal py-3 active:scale-95 transition-transform border border-emerald-deep/10 ${currentCount >= dhikr.secondaryCount
+                  className={`flex-1 h-auto whitespace-normal py-3 active:scale-[0.96] transition-transform border border-emerald-deep/10 ${currentCount >= dhikr.secondaryCount
                     ? "bg-transparent text-emerald-deep/40 shadow-none"
                     : "bg-gold-matte text-white hover:bg-gold-matte/80 shadow-md"
                     }`}
@@ -309,7 +309,7 @@ const AzkarCategory = ({
   return renderContent(data);
 };
 
-export const AzkarList = () => {
+export const AzkarList = memo(() => {
   const { t, language } = useLanguage();
   const [resetKey, setResetKey] = useState(0);
 
@@ -415,6 +415,7 @@ export const AzkarList = () => {
       </Tabs>
     </div>
   );
-};
+});
+AzkarList.displayName = "AzkarList";
 
 

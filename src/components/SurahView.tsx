@@ -91,11 +91,11 @@ const AyahItem = ({
             id={`ayah-${ayah.numberInSurah}`}
             ref={setRef}
             onClick={handleClick}
-            className={`relative group inline px-1.5 rounded-lg transition-colors duration-200 cursor-pointer ${isPlaying ? "bg-gold-matte/20" : "hover:bg-emerald-deep/5"
+            className={`relative group inline px-1.5 rounded-lg transition-colors duration-[369ms] cursor-pointer ${isPlaying ? "bg-gold-matte/20" : "hover:bg-emerald-deep/5"
                 }`}
             title={language === "ar" ? "اضغط للاستماع" : "Click to play"}
         >
-            <span className={`transition-colors duration-300 ${isPlaying ? "text-emerald-deep font-bold" : "text-reading"
+            <span className={`transition-colors duration-[369ms] ${isPlaying ? "text-emerald-deep font-bold" : "text-reading"
                 }`}>
                 {highlightText(surahNumber === 1
                     ? ayah.text.replace(/[\u06DF\u06ED]/g, "")
@@ -201,7 +201,7 @@ export const SurahView = () => {
     const [playingAyahNumber, setPlayingAyahNumber] = useState<number | null>(null);
     const [jumpToAyah, setJumpToAyah] = useState<number | null>(null);
     const ayahRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-    const { quranFont, readingStyle } = useSettings();
+    const { quranFont } = useSettings();
     const [showPlayer, setShowPlayer] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
@@ -307,28 +307,8 @@ export const SurahView = () => {
             setCurrentPage(initialPage);
 
             try {
-                // Determine which JSON to load based on readingStyle setting
-                let quranModule;
-
-                // You will need to import useSettings at the top if not already imported
-                // readingStyle is available from useSettings() hook
-
-                // Since this effect depends on readingStyle, we need to access it inside
-                // If standard hook rules apply, useSettings is already called at top level
-                // We just need to use the value here.
-
-                if (readingStyle === 'warsh') {
-                    // We will assume quran-warsh.json is available in src/lib
-                    // If it doesn't exist yet, we must ensure it is created or handle error
-                    try {
-                        quranModule = await import("@/lib/quran-warsh.json");
-                    } catch (e) {
-                        console.warn("Warsh JSON not found, falling back to Uthmani", e);
-                        quranModule = await import("@/lib/quran-uthmani.json");
-                    }
-                } else {
-                    quranModule = await import("@/lib/quran-uthmani.json");
-                }
+                // Always load standard Uthmani 
+                const quranModule = await import("@/lib/quran-uthmani.json");
 
                 // Accessing default export for JSON module
                 const data = (quranModule as { default?: { data: { surahs: SurahData[] } }, data?: { surahs: SurahData[] } });
@@ -374,7 +354,7 @@ export const SurahView = () => {
                 // To force play, we might need a prop on SurahAudioPlayer like 'autoPlay={true}'
             }, 500);
         }
-    }, [surahId, language, location.search, readingStyle]);
+    }, [surahId, language, location.search]);
 
     // Handle scrolling to target ayah after render
     useEffect(() => {

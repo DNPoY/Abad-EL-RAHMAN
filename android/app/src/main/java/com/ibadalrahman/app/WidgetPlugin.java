@@ -25,6 +25,9 @@ public class WidgetPlugin extends Plugin {
         String nextPrayerName = call.getString("nextPrayerName");
         String hijriDate = call.getString("hijriDate");
         String locationName = call.getString("locationName");
+        Integer dhikrProgress = call.getInt("dhikrProgress");
+        String currentDhikr = call.getString("currentDhikr");
+        Integer dhikrTarget = call.getInt("dhikrTarget");
 
         Context context = getContext();
         SharedPreferences prefs = context.getSharedPreferences("PrayerWidgetPrefs", Context.MODE_PRIVATE);
@@ -38,6 +41,9 @@ public class WidgetPlugin extends Plugin {
         if (nextPrayerName != null) editor.putString("nextPrayerName", nextPrayerName);
         if (hijriDate != null) editor.putString("hijriDate", hijriDate);
         if (locationName != null) editor.putString("locationName", locationName);
+        if (dhikrProgress != null) editor.putInt("dhikrProgress", dhikrProgress);
+        if (currentDhikr != null) editor.putString("currentDhikr", currentDhikr);
+        if (dhikrTarget != null) editor.putInt("dhikrTarget", dhikrTarget);
         
         editor.apply();
 

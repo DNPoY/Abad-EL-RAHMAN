@@ -38,11 +38,11 @@ export const EASE_CURVES = {
 
 export const TRANSITION_DURATIONS = {
     INSTANT: 0,
-    FAST: 0.15,
-    MEDIUM: 0.3,
-    SLOW: 0.6,
-    VERY_SLOW: 1,
-    CELEBRATION: 2.5,
+    FAST: 0.33,
+    MEDIUM: 0.66,
+    SLOW: 0.99,
+    VERY_SLOW: 1.33,
+    CELEBRATION: 3.33,
 } as const;
 
 export const FADE_VARIANTS = {
@@ -82,4 +82,4 @@ export const CONFETTI_CONFIG = {
     COLORS: ['#C5A059', '#D4B06A', '#047857', '#10B981', '#FFFFFF'] as string[],
 } as const;
 
-export const NUMBER_FLIP_DURATION = 0.3; // seconds
+export const NUMBER_FLIP_DURATION = 0.33; // seconds

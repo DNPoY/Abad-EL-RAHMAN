@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSettings } from "@/contexts/SettingsContext";
+
 import { surahs } from "@/lib/quran-data";
 import { Search, BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -50,9 +50,10 @@ interface SearchResult {
     text: string;
 }
 
-export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
+export const QuranIndex = memo(({ isEmbedded = false }: QuranIndexProps) => {
+
     const { language } = useLanguage();
-    const { readingStyle, setReadingStyle } = useSettings();
+
     const [searchQuery, setSearchQuery] = useState("");
     const [ayahResults, setAyahResults] = useState<SearchResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -162,7 +163,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                                         </h3>
                                     </div>
                                 </div>
-                                <ArrowRight className={`w-5 h-5 text-gold-matte transition-transform duration-300 ${language === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
+                                <ArrowRight className={`w-5 h-5 text-gold-matte transition-transform duration-[369ms] ${language === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
                             </div>
                         </Link>
                     </div>
@@ -189,24 +190,14 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                             {language === "ar" ? "اقرأ وارتق" : "Read and Rise"}
                         </span>
 
-                        <Button
-                            variant="outline"
-                            onClick={() => setReadingStyle(readingStyle === 'hafs' ? 'warsh' : 'hafs')}
-                            className="mt-4 gap-2 border-emerald-deep/20 text-emerald-deep hover:bg-emerald-deep/5 font-amiri min-w-[140px]"
-                        >
-                            <BookOpen className="w-4 h-4" />
-                            {readingStyle === 'hafs'
-                                ? (language === "ar" ? "رواية حفص" : "Hafs Style")
-                                : (language === "ar" ? "رواية ورش" : "Warsh Style")
-                            }
-                        </Button>
+
                     </div>
                 </div>
 
                 {/* Search Bar */}
                 <div className="max-w-xl mx-auto mb-8 relative z-20">
                     <div className="relative group">
-                        <div className="absolute inset-0 bg-emerald-deep/5 blur-xl rounded-full transform scale-90 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute inset-0 bg-emerald-deep/5 blur-xl rounded-full transform scale-90 opacity-0 group-hover:opacity-100 transition-opacity duration-[618ms]" />
                         <div className="relative flex shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-2xl bg-white border border-emerald-deep/5 overflow-hidden">
                             <Input
                                 placeholder={language === "ar" ? "ابحث عن سورة أو آية..." : "Search Surah or Ayah..."}
@@ -236,7 +227,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                     <div className="max-w-xl mx-auto mb-6 flex bg-emerald-deep/5 p-1 rounded-xl">
                         <button
                             onClick={() => setViewMode('surah')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-300 ${viewMode === 'surah'
+                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-[369ms] ${viewMode === 'surah'
                                 ? 'bg-white text-emerald-deep shadow-sm'
                                 : 'text-emerald-deep/60 hover:text-emerald-deep'
                                 }`}
@@ -245,7 +236,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                         </button>
                         <button
                             onClick={() => setViewMode('juz')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-300 ${viewMode === 'juz'
+                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-[369ms] ${viewMode === 'juz'
                                 ? 'bg-white text-emerald-deep shadow-sm'
                                 : 'text-emerald-deep/60 hover:text-emerald-deep'
                                 }`}
@@ -254,7 +245,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                         </button>
                         <button
                             onClick={() => setViewMode('khatma')}
-                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-300 ${viewMode === 'khatma'
+                            className={`flex-1 py-2 rounded-lg text-sm font-bold font-tajawal transition-all duration-[369ms] ${viewMode === 'khatma'
                                 ? 'bg-white text-emerald-deep shadow-sm'
                                 : 'text-emerald-deep/60 hover:text-emerald-deep'
                                 }`}
@@ -277,7 +268,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {juzData.map((juz) => (
                                 <Link to={`/quran/${juz.surah}?ayah=${juz.ayah}`} key={juz.id}>
-                                    <div className="group relative bg-white rounded-2xl p-4 border border-emerald-deep/5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                                    <div className="group relative bg-white rounded-2xl p-4 border border-emerald-deep/5 transition-all duration-[369ms] hover:shadow-md hover:-translate-y-0.5">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 flex items-center justify-center bg-emerald-50 rounded-lg group-hover:bg-emerald-deep group-hover:text-white transition-colors">
@@ -305,7 +296,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                         <div className="space-y-3">
                             {filteredSurahs.map((surah) => (
                                 <Link to={`/quran/${surah.number}`} key={surah.number}>
-                                    <div className="group relative bg-white rounded-2xl p-5 border border-emerald-deep/5 transition-all duration-300 hover:shadow-[0_10px_40px_-10px_rgba(9,66,49,0.1)] hover:-translate-y-1 overflow-hidden">
+                                    <div className="group relative bg-white rounded-2xl p-5 border border-emerald-deep/5 transition-all duration-[369ms] hover:shadow-[0_10px_40px_-10px_rgba(9,66,49,0.1)] hover:-translate-y-1 overflow-hidden">
                                         {/* Hover Accent */}
                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-deep opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -313,7 +304,7 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
                                             <div className="flex items-center gap-5">
                                                 {/* Number Badge */}
                                                 <div className="w-12 h-12 flex items-center justify-center relative">
-                                                    <div className="absolute inset-0 bg-emerald-50 rounded-xl rotate-45 group-hover:rotate-90 transition-transform duration-500" />
+                                                    <div className="absolute inset-0 bg-emerald-50 rounded-xl rotate-45 group-hover:rotate-90 transition-transform duration-[618ms]" />
                                                     <span className="font-tajawal font-bold text-lg text-emerald-deep relative z-10">
                                                         {surah.number}
                                                     </span>
@@ -392,4 +383,5 @@ export const QuranIndex = ({ isEmbedded = false }: QuranIndexProps) => {
             </div>
         </div>
     );
-};
+});
+QuranIndex.displayName = "QuranIndex";

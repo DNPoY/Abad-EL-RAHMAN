@@ -96,10 +96,10 @@ export default {
         }
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in-up": "fadeInUp 0.6s ease-out forwards",
-        "pulse-soft": "pulseSoft 3s ease-in-out infinite",
+        "accordion-down": "accordion-down 0.369s ease-out",
+        "accordion-up": "accordion-up 0.369s ease-out",
+        "fade-in-up": "fadeInUp 0.618s ease-out forwards",
+        "pulse-soft": "pulseSoft 3.69s ease-in-out infinite",
       },
     },
   },

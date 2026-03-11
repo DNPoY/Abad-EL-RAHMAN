@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Play, Pause, Loader2, SkipForward, SkipBack, Download, Check } from "lucide-react";
 import { RECITERS } from "@/lib/audio-constants";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSettings } from "@/contexts/SettingsContext";
+
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
@@ -23,17 +23,13 @@ interface SurahAudioPlayerProps {
 
 export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpToAyah, onClose, onPlayChange, onSurahEnd, autoPlay = false }: SurahAudioPlayerProps) => {
     const { language, t } = useLanguage();
-    const { readingStyle } = useSettings();
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentAyah, setCurrentAyah] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Filter reciters based on reading style
-    const filteredReciters = RECITERS.filter(r => {
-        const style = r.style || 'Hafs';
-        const currentStyle = readingStyle || 'hafs';
-        return style.toLowerCase() === currentStyle.toLowerCase();
-    });
+    // Filter reciters: All are Hafs now
+    const filteredReciters = RECITERS;
 
     const [selectedReciterId, setSelectedReciterId] = useState<string>(() => {
         const saved = localStorage.getItem("selectedReciterId");
@@ -47,7 +43,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
         if (!currentReciter && filteredReciters.length > 0) {
             setSelectedReciterId(filteredReciters[0].id);
         }
-    }, [readingStyle, selectedReciterId, filteredReciters]);
+    }, [selectedReciterId, filteredReciters]);
 
     useEffect(() => {
         localStorage.setItem("selectedReciterId", selectedReciterId);
@@ -176,51 +172,16 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
     const getAyahUrl = useCallback(async (surah: number, ayah: number) => {
         const reciter = RECITERS.find(r => r.id === selectedReciterId) || RECITERS[0];
 
-        // Handle Warsh Offset for Surah Al-Fatiha (1)
-        // In Hafs (which our text uses), Verse 1 is Basmalah.
-        // In Warsh audio (EveryAyah), 001001.mp3 is often "Al-Hamdu" (Verse 2 in Hafs).
-        // So we need to shift by -1 for Warsh reciters in Surah 1, and provide a fallback for Basmalah.
-
-        let targetAyah = ayah;
-        let shouldUseFallbackBasmalah = false;
-
-        if (readingStyle === 'warsh' && surah === 1) {
-            if (ayah === 1) {
-                shouldUseFallbackBasmalah = true;
-            } else {
-                targetAyah = ayah - 1;
-            }
-        }
-
         const paddedSurah = surah.toString().padStart(3, "0");
-        const paddedAyah = targetAyah.toString().padStart(3, "0");
+        const paddedAyah = ayah.toString().padStart(3, "0");
 
-        // Use Reciter URL or Fallback for Basmalah in Warsh Fatiha
         let remoteUrl = `${reciter.url}${paddedSurah}${paddedAyah}.mp3`;
-        if (shouldUseFallbackBasmalah) {
-            // Fallback to Abdul Basit Hafs or Al-Afasy for Basmalah if using Warsh
-            // Or better, use the assigned reciter IF they have 001000? We checked AA Warsh doesn't.
-            // Let's use Al-Afasy strictly for this single verse as a safe fallback
-            remoteUrl = `https://everyayah.com/data/Alafasy_128kbps/001001.mp3`;
-        }
-
         const fileName = `${paddedAyah}.mp3`;
 
         // OFFLINE CHECK: Only check filesystem if we know the Surah is downloaded
         // This prevents the "spinning" hang by avoiding filesystem calls for streaming-only users
         if (Capacitor.isNativePlatform() && isDownloaded) {
             try {
-                // If using fallback basmalah, likely not downloaded in the warsh folder? 
-                // Or we downloaded it as 001.mp3?
-                // Our download logic uses loop 1..7.
-                // If we download Warsh, we likely download 001001..001007.
-                // But if we shift offset, we need to map correctly.
-                // COMPLEXITY: Download also needs this offset logic if we want offline to work perfect.
-                // For now, let's keep download standard (1..7) and just map playback.
-                // If mapping playback changes ID, we might miss the local file if it was saved differently.
-                // But download saves whatever URL we give it.
-                // Let's assume for now streaming fix is priority.
-
                 const path = `quran/${selectedReciterId}/${surah}/${fileName}`;
                 // Check if file exists first (using stat usually, but getUri works if we handle error)
                 const fileInfo = await Filesystem.getUri({
@@ -237,7 +198,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
         }
 
         return remoteUrl;
-    }, [selectedReciterId, isDownloaded, readingStyle]);
+    }, [selectedReciterId, isDownloaded]);
 
     // Track the implementation request ID to invalidate stale async operations
     const requestIdRef = useRef(0);
@@ -304,6 +265,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
 
                 // 4. Play if supposed to be playing
                 if (isPlaying) {
+                    audio.playbackRate = 0.981818; // 432Hz Tuning (432/440)
                     const playPromise = audio.play();
                     if (playPromise !== undefined) {
                         playPromise
@@ -360,12 +322,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
         if (currentAyah > 1) setCurrentAyah(c => c - 1);
     };
 
-    const groupedReciters = filteredReciters.reduce((acc, reciter) => {
-        const style = reciter.style || 'Hafs';
-        if (!acc[style]) acc[style] = [];
-        acc[style].push(reciter);
-        return acc;
-    }, {} as Record<string, typeof RECITERS>);
+    const groupedReciters = { 'Hafs': RECITERS };
 
     return (
         <div className="w-full bg-background/95 backdrop-blur-md border-t border-border p-4 shadow-lg animate-in slide-in-from-bottom rounded-t-2xl">
@@ -413,7 +370,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
                                     {Object.entries(groupedReciters).map(([style, reciters]) => (
                                         <SelectGroup key={style}>
                                             <SelectLabel className="text-muted-foreground text-[10px] uppercase tracking-wider px-2 py-1 bg-muted/50">
-                                                {language === 'ar' ? (style === 'Hafs' ? 'حفص عن عاصم' : style === 'Warsh' ? 'ورش عن نافع' : style) : style}
+                                                {language === 'ar' ? 'حفص عن عاصم' : 'Hafs'}
                                             </SelectLabel>
                                             {reciters.map((reciter) => (
                                                 <SelectItem key={reciter.id} value={reciter.id}>

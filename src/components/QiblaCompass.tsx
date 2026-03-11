@@ -1,10 +1,13 @@
+import { memo } from 'react';
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Compass, Navigation } from "lucide-react";
+import { Compass, Navigation, Camera } from "lucide-react";
 import { toast } from "sonner";
+import { QiblaAR } from "./QiblaAR";
 
-export const QiblaCompass = () => {
+export const QiblaCompass = memo(() => {
   const { t, language } = useLanguage();
   // Load cached values immediately to prevent waiting
   const [qiblaDirection, setQiblaDirection] = useState<number>(() => {
@@ -13,6 +16,7 @@ export const QiblaCompass = () => {
   });
   const [deviceHeading, setDeviceHeading] = useState<number>(0);
   const [hasPermission, setHasPermission] = useState(false);
+  const [showAR, setShowAR] = useState(false);
 
   useEffect(() => {
     const calculateQibla = (latitude: number, longitude: number) => {
@@ -51,10 +55,10 @@ export const QiblaCompass = () => {
               calculateQibla(position.coords.latitude, position.coords.longitude);
             },
             (err) => console.error("Error getting location:", err),
-            { enableHighAccuracy: true, timeout: 10000 }
+            { enableHighAccuracy: true, timeout: 6000 } // 6 seconds
           );
         },
-        { maximumAge: Infinity, timeout: 5000, enableHighAccuracy: false }
+        { maximumAge: 540000, timeout: 6000, enableHighAccuracy: false } // 9 mins maximumAge, 6 seconds timeout
       );
     }
   }, []);
@@ -102,45 +106,48 @@ export const QiblaCompass = () => {
   }, [isAligned]);
 
   return (
-    <Card className="p-6 islamic-pattern border-primary/20 bg-emerald-950/30 backdrop-blur-sm">
-      <div className="text-center mb-8">
-        <h3 className="text-2xl font-bold font-amiri mb-2 text-primary dark:text-emerald-400">{t.qiblaDirection}</h3>
+    <Card className="p-6 border-emerald-deep/20 bg-gradient-to-br from-cream to-white shadow-xl">
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold font-amiri mb-1 text-emerald-deep">{t.qiblaDirection}</h3>
         <p className="text-sm text-muted-foreground">{t.pointNorth}</p>
       </div>
 
       <div className="relative w-72 h-72 mx-auto">
-        {/* Main Compass Body - Gold Gradient Ring */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#C5A059] via-[#F0E68C] to-[#8B6508] shadow-2xl overflow-hidden p-[6px]">
-          {/* Inner Content - Compass Background */}
-          <div className="w-full h-full rounded-full bg-[#094231] relative">
+        {/* Outer Ring - Elegant Gold Border */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold-matte via-gold-light to-gold-matte p-1 shadow-2xl shadow-gold-matte/30">
+          {/* Compass Body - Cream background */}
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-cream to-white relative overflow-hidden">
 
-            {/* Inner Decorative Pattern (Subtle) */}
-            <div className="absolute inset-0 opacity-20"
-              style={{ backgroundImage: 'radial-gradient(circle at center, transparent 30%, #000 100%)' }} />
+            {/* Subtle Pattern Overlay */}
+            <div className="absolute inset-0 opacity-5"
+              style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, hsl(var(--deep-emerald)) 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
 
-            {/* Rotating Dial (Compass Face) - Rotates to point North */}
+            {/* Rotating Dial - Points North */}
             <div
               className="absolute inset-0 transition-transform duration-500 ease-out"
               style={{ transform: `rotate(${-deviceHeading}deg)` }}
             >
-              {/* Golden Ratio Spiral Element (Creative Addition) */}
-              <div className="absolute inset-6 opacity-10">
-                <svg viewBox="0 0 100 100" className="w-full h-full stroke-[#C5A059] fill-none" strokeWidth="0.5">
-                  <path d="M50 50 L50 50 A 1 1 0 0 1 51 51 A 2 2 0 0 1 49 53 A 5 5 0 0 1 44 48 A 13 13 0 0 1 57 35 A 34 34 0 0 1 91 69" />
-                  <circle cx="50" cy="50" r="1.5" fill="#C5A059" />
-                </svg>
-              </div>
+              {/* Degree Markers */}
+              {[...Array(72)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute top-0 left-1/2 origin-bottom"
+                  style={{ height: '50%', transform: `translateX(-50%) rotate(${i * 5}deg)` }}
+                >
+                  <div className={`w-0.5 ${i % 6 === 0 ? 'h-3 bg-emerald-deep' : 'h-1.5 bg-emerald-deep/30'}`} />
+                </div>
+              ))}
 
-              {/* Cardinal Points Only - No Ticks */}
-              <div className="absolute inset-2">
-                <span className="absolute top-2 left-1/2 -translate-x-1/2 font-bold text-[#FF6B6B] text-xl font-amiri">N</span> {/* Softer Red */}
-                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 font-bold text-[#C5A059] text-xl font-amiri">S</span>
-                <span className="absolute top-1/2 left-2 -translate-y-1/2 font-bold text-[#C5A059] text-xl font-amiri">W</span>
-                <span className="absolute top-1/2 right-2 -translate-y-1/2 font-bold text-[#C5A059] text-xl font-amiri">E</span>
+              {/* Cardinal Points */}
+              <div className="absolute inset-4">
+                <span className="absolute top-1 left-1/2 -translate-x-1/2 font-bold text-red-500 text-lg font-amiri drop-shadow-sm">N</span>
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 font-bold text-emerald-deep text-lg font-amiri">S</span>
+                <span className="absolute top-1/2 left-1 -translate-y-1/2 font-bold text-emerald-deep text-lg font-amiri">W</span>
+                <span className="absolute top-1/2 right-1 -translate-y-1/2 font-bold text-emerald-deep text-lg font-amiri">E</span>
               </div>
             </div>
 
-            {/* Qibla Needle (The Golden Pointer) */}
+            {/* Qibla Needle */}
             <div
               className="absolute inset-0 transition-transform duration-500 ease-out"
               style={{ transform: `rotate(${-deviceHeading}deg)` }}
@@ -149,53 +156,71 @@ export const QiblaCompass = () => {
                 className="absolute inset-0 transition-transform duration-700 ease-out"
                 style={{ transform: `rotate(${qiblaDirection}deg)` }}
               >
-                {/* The Needle Graphic */}
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center"> {/* Adjusted top position for larger icon */}
-                  {/* Kaaba Icon at tip - Larger & White */}
-                  <div className={`transition-all duration-500 ${isAligned ? "scale-125 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-bounce" : "scale-100"}`}>
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> {/* Increased size to 48x48 */}
-                      <path d="M4 7H20V19H4V7Z" fill="#FFFFFF" stroke="#000000" strokeWidth="2" /> {/* White Fill with Black Outline */}
-                      <path d="M4 7L12 11L20 7" stroke="#000000" strokeWidth="2" />
-                      <path d="M4 11H20" stroke="#000000" strokeWidth="1" strokeOpacity="0.5" />
-                      {/* Add Gold Band to Kaaba for detail */}
-                      <rect x="4" y="9" width="16" height="3" fill="#FFD700" fillOpacity="0.8" />
-                    </svg>
+                {/* Needle Pointer */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                  {/* Kaaba Icon */}
+                  <div className={`transition-all duration-500 ${isAligned ? "scale-125 animate-pulse" : "scale-100"}`}>
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-deep to-emerald-800 flex items-center justify-center shadow-lg ${isAligned ? 'shadow-emerald-deep/50 ring-2 ring-gold-matte ring-offset-2' : ''}`}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="6" width="14" height="14" fill="#1a1a1a" stroke="#C5A059" strokeWidth="1.5" />
+                        <rect x="5" y="10" width="14" height="2" fill="#C5A059" />
+                        <path d="M5 6L12 2L19 6" stroke="#C5A059" strokeWidth="1.5" fill="none" />
+                      </svg>
+                    </div>
                   </div>
-                  {/* The Needle Shaft */}
-                  <div className={`w-1.5 h-20 rounded-full -mt-2 bg-gradient-to-b from-[#FFFFFF] to-transparent opacity-80 ${isAligned ? "shadow-[0_0_15px_#FFFFFF]" : ""}`} />
+                  {/* Needle Shaft */}
+                  <div className={`w-1 h-24 -mt-1 bg-gradient-to-b from-emerald-deep via-emerald-deep/80 to-transparent rounded-full ${isAligned ? 'shadow-[0_0_10px_rgba(9,66,49,0.5)]' : ''}`} />
                 </div>
               </div>
             </div>
 
             {/* Center Pivot */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-4 h-4 rounded-full bg-[#C5A059] border-2 border-[#094231] shadow-lg z-10" />
-              <div className="w-32 h-0.5 bg-[#C5A059]/30 absolute rotate-90" /> {/* Crosshair Vertical */}
-              <div className="w-32 h-0.5 bg-[#C5A059]/30 absolute" /> {/* Crosshair Horizontal */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gold-matte to-gold-light border-2 border-white shadow-lg z-10" />
             </div>
           </div>
-
         </div>
-
       </div>
 
-      <div className="mt-8 text-center space-y-2">
-        <div className="inline-block px-4 py-2 rounded-full bg-[#094231]/10 border border-[#C5A059]/30">
-          <span className="text-3xl font-bold text-[#C5A059] font-amiri">
-            {Math.round(deviceHeading)}° <span className="text-sm text-muted-foreground mx-2">➞</span>
-            <span className={`${isAligned ? "text-green-500" : "text-primary"}`}>{Math.round(qiblaDirection)}°</span>
-          </span>
-        </div>
-
-        <div className="h-8 flex items-center justify-center">
-          {isAligned && (
-            <div className="flex items-center gap-2 text-green-600 bg-green-100/50 px-3 py-1 rounded-full animate-bounce">
-              <Compass className="w-4 h-4" />
-              <span className="font-bold">{language === "ar" ? "القبلة صحيحة!" : "You are facing the Qibla!"}</span>
+      {/* Info Display */}
+      <div className="mt-8 text-center space-y-4">
+        <div className="flex flex-col gap-3 items-center">
+            <Button 
+                onClick={() => setShowAR(true)}
+                className="w-full bg-emerald-deep hover:bg-emerald-800 text-white gap-2 py-6 rounded-2xl shadow-lg ring-1 ring-gold-matte/30"
+            >
+                <Camera className="w-5 h-5 text-gold-matte" />
+                {language === 'ar' ? 'عرض الواقع المعزز (AR)' : 'Open AR Radar'}
+            </Button>
+            
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-emerald-deep/10 shadow-sm w-full justify-center">
+                <div className="text-center">
+                    <span className="text-xs text-muted-foreground block">{language === 'ar' ? 'اتجاهك' : 'Heading'}</span>
+                    <span className="text-2xl font-bold text-emerald-deep font-amiri">{Math.round(deviceHeading)}°</span>
+                </div>
+                <Navigation className="w-5 h-5 text-gold-matte mx-2" />
+                <div className="text-center">
+                    <span className="text-xs text-muted-foreground block">{language === 'ar' ? 'القبلة' : 'Qibla'}</span>
+                    <span className={`text-2xl font-bold font-amiri ${isAligned ? 'text-green-600' : 'text-gold-matte'}`}>{Math.round(qiblaDirection)}°</span>
+                </div>
             </div>
-          )}
         </div>
+
+        {isAligned && (
+          <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-full animate-bounce border border-green-200">
+            <Compass className="w-5 h-5" />
+            <span className="font-bold">{language === "ar" ? "القبلة صحيحة!" : "You are facing the Qibla!"}</span>
+          </div>
+        )}
       </div>
+      
+      {showAR && (
+        <QiblaAR 
+            qiblaDirection={qiblaDirection} 
+            onClose={() => setShowAR(false)} 
+        />
+      )}
     </Card>
   );
-};
+});
+QiblaCompass.displayName = "QiblaCompass";

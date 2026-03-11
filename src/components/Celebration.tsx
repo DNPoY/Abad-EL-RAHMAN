@@ -15,7 +15,7 @@ export const Celebration = ({ trigger, onComplete }: CelebrationProps) => {
     useEffect(() => {
         if (!trigger) return;
 
-        const duration = 2500; // 2.5 seconds
+        const duration = 3300; // 3.3 seconds
         const animationEnd = Date.now() + duration;
         const defaults = {
             startVelocity: CONFETTI_CONFIG.START_VELOCITY,
@@ -53,7 +53,7 @@ export const Celebration = ({ trigger, onComplete }: CelebrationProps) => {
                 particleCount,
                 origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
             });
-        }, 250);
+        }, 330);
 
         return () => clearInterval(interval);
     }, [trigger, onComplete]);

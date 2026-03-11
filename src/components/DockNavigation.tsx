@@ -25,7 +25,7 @@ export const DockIcon = ({ icon: Icon, label, tabId, isActive, onClick, mouseX, 
         if (!bounds) return DOCK_ANIMATION.INFLUENCE_DISTANCE;
 
         const centerX = Number(bounds.x) + Number(bounds.width) / 2;
-        return Math.abs(val - centerX);
+        return Math.abs((val as number) - centerX);
     });
 
     const widthSync = useTransform(
@@ -44,7 +44,7 @@ export const DockIcon = ({ icon: Icon, label, tabId, isActive, onClick, mouseX, 
             ref={ref}
             onClick={onClick}
             style={{ width: size, height: size }}
-            className={`relative flex items-center justify-center rounded-full transition-colors duration-300 shrink-0 ${isActive
+            className={`relative flex items-center justify-center rounded-full transition-colors duration-[330ms] shrink-0 ${isActive
                 ? 'bg-gold-matte text-white shadow-lg shadow-gold-matte/30'
                 : 'text-white/60 hover:text-white/80'
                 }`}

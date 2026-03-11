@@ -79,8 +79,8 @@ const DEFAULTS = {
     })
 };
 
-// Caching interval: 12 hours (43200000 ms)
-const FETCH_INTERVAL_MS = 43200000;
+// Caching interval: 9 hours (32400000 ms) - 3-6-9 Protocol
+const FETCH_INTERVAL_MS = 32400000;
 
 let isFetched = false;
 

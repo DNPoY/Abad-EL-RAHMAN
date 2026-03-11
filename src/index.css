@@ -61,13 +61,70 @@
     --input: 162 20% 90%;
     --ring: var(--deep-emerald);
 
-    --radius: 1.5rem;
+    --radius: 1.618rem;
     /* 24px - Modern rounded look */
+  }
+
+  [data-theme="makkah-midnight"] {
+    --background: 220 40% 5%;
+    --foreground: 45 48% 90%;
+    --primary: 45 48% 56%; /* Gold */
+    --primary-foreground: 220 40% 5%;
+    --secondary: 220 30% 15%;
+    --secondary-foreground: 45 48% 90%;
+    --muted: 220 20% 10%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 45 48% 56%;
+    --accent-foreground: 220 40% 5%;
+    --card: 220 35% 8%;
+    --card-foreground: 45 48% 90%;
+    --border: 220 30% 15%;
+    --ring: 45 48% 56%;
+    --emerald-deep: 220 40% 5%;
+    --gold-matte: 45 48% 56%;
+  }
+
+  [data-theme="madinah-dawn"] {
+    --background: 270 30% 98%; /* Light Lavenderish */
+    --foreground: 160 80% 15%; /* Sage/Green */
+    --primary: 160 60% 30%; /* Prophet's Green */
+    --primary-foreground: 270 30% 98%;
+    --secondary: 270 20% 92%;
+    --secondary-foreground: 160 80% 15%;
+    --muted: 270 10% 90%;
+    --muted-foreground: 160 20% 50%;
+    --accent: 275 40% 60%; /* Soft Purple */
+    --accent-foreground: 270 30% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 160 80% 15%;
+    --border: 160 20% 90%;
+    --ring: 160 60% 30%;
+    --emerald-deep: 160 60% 25%;
+    --gold-matte: 45 48% 56%;
+  }
+
+  [data-theme="andalusian-gold"] {
+    --background: 35 40% 96%; /* Warm Sand */
+    --foreground: 25 60% 20%; /* Burnt Umber */
+    --primary: 40 70% 50%; /* Deep Gold */
+    --primary-foreground: 35 40% 96%;
+    --secondary: 35 30% 90%;
+    --secondary-foreground: 25 60% 20%;
+    --muted: 35 20% 85%;
+    --muted-foreground: 25 20% 50%;
+    --accent: 200 60% 40%; /* Islamic Azure */
+    --accent-foreground: 35 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 60% 20%;
+    --border: 40 30% 85%;
+    --ring: 40 70% 50%;
+    --emerald-deep: 25 60% 20%;
+    --gold-matte: 40 70% 50%;
   }
 
   /* Global Font Size Scaling */
   html.font-size-small {
-    font-size: 14px;
+    font-size: 9.88px; /* 16 / 1.618 */
   }
 
   html.font-size-medium {
@@ -76,7 +133,7 @@
   }
 
   html.font-size-large {
-    font-size: 19px;
+    font-size: 25.88px; /* 16 * 1.618 */
   }
 
   html {
@@ -90,6 +147,7 @@
     /* Primary UI Font */
     min-height: 100vh;
     padding-bottom: env(safe-area-inset-bottom);
+    line-height: 1.618;
     /* Subtle Grain Texture Overlay can be added here if needed via pseudo-element */
   }
 
@@ -139,10 +197,18 @@
 
   /* Utility Classes */
   .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, 0.5);
+    will-change: backdrop-filter;
+  }
+
+  /* Android: higher opacity, reduced blur for better performance */
+  @supports not (backdrop-filter: blur(6px)) {
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.92);
+    }
   }
 
   .glass-panel-dark {
@@ -179,7 +245,7 @@
   }
 
   .animate-fade-in-up {
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInUp 0.618s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeInDown {
@@ -195,7 +261,7 @@
   }
 
   .animate-fade-in-down {
-    animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInDown 0.618s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeIn {
@@ -209,7 +275,7 @@
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.369s ease-out forwards;
   }
 
   @keyframes pulseSoft {
@@ -225,7 +291,60 @@
   }
 
   .animate-pulse-soft {
-    animation: pulseSoft 3s ease-in-out infinite;
+    animation: pulseSoft 3.69s ease-in-out infinite;
+  }
+
+  /* Professional "Coherent Breathing" frequency: 0.15Hz (6.66s) */
+  @keyframes pulseBreathing {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.6;
+    }
+  }
+
+  .animate-pulse-breathing {
+    animation: pulseBreathing 6.93s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Harmonic Strobe Logic: Subtle flickering/glow */
+  @keyframes harmonicStrobe {
+    0%, 100% {
+      filter: brightness(1) drop-shadow(0 0 5px var(--primary) / 0.1);
+    }
+    33% {
+      filter: brightness(1.1) drop-shadow(0 0 12px var(--primary) / 0.3);
+    }
+    66% {
+      filter: brightness(1.05) drop-shadow(0 0 8px var(--primary) / 0.2);
+    }
+  }
+
+  .animate-harmonic-strobe {
+    animation: harmonicStrobe 4.32s ease-in-out infinite;
+    will-change: filter;
+  }
+
+  /* Pause animations when page is not visible (saves GPU) */
+  .page-hidden .animate-pulse-breathing,
+  .page-hidden .animate-harmonic-strobe,
+  .page-hidden .animate-pulse-soft,
+  .page-hidden .animate-pulse-glow-green {
+    animation-play-state: paused;
+  }
+
+  /* Respect user's reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-pulse-breathing,
+    .animate-harmonic-strobe,
+    .animate-pulse-soft,
+    .animate-pulse-glow-green {
+      animation: none;
+    }
   }
 }
 
@@ -286,7 +405,7 @@
 }
 
 .animate-pulse-glow-green {
-  animation: pulseGlowGreen 2s infinite ease-in-out;
+  animation: pulseGlowGreen 3.69s infinite ease-in-out;
 }
 
 /* Force removal of focus outlines for navigation items */

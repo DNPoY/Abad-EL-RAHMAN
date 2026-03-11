@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useCounter } from "@/hooks/useCounter";
 import { useCelebration } from "@/components/Celebration";
-import { TASBIH_TARGETS } from "@/lib/constants";
+import { TASBIH_TARGETS, HAPTIC_PATTERNS } from "@/lib/constants";
 import { SPRING_CONFIGS, SCALE_VARIANTS } from "@/lib/animation-constants";
 import { TasbihTarget } from "@/types/tasbih";
 import {
@@ -16,6 +16,10 @@ import {
     announceTasbihCount,
     announceTasbihComplete,
 } from "@/lib/accessibility";
+import { GoldenRatioSpiral } from "./GoldenRatioSpiral";
+import { useWidgetUpdater } from "@/hooks/useWidgetUpdater";
+import { usePrayerTimes } from "@/contexts/PrayerTimesContext";
+import { triggerPatternHaptic } from "@/lib/haptics";
 
 // Memoized counter button component for performance
 const CounterButton = memo(({
@@ -39,20 +43,20 @@ const CounterButton = memo(({
         >
             <Button
                 variant="outline"
-                className="w-64 h-64 rounded-full border-4 border-primary/20 text-6xl font-bold hover:bg-primary/5 transition-all shadow-xl relative overflow-hidden"
+                className="w-64 h-64 rounded-full border-4 border-primary/20 text-6xl font-bold hover:bg-primary/5 transition-all shadow-xl relative overflow-hidden flex items-center justify-center p-0 animate-harmonic-strobe"
                 onClick={onClick}
                 aria-label={ariaLabel}
                 aria-live="polite"
                 aria-atomic="true"
             >
-                {/* Animated Progress Ring */}
-                <motion.div
-                    className="absolute bottom-0 left-0 right-0 bg-primary/10"
-                    initial={{ height: '0%' }}
-                    animate={{ height: target ? `${progress}%` : '0%' }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    style={{ opacity: target ? 1 : 0 }}
-                />
+                {/* Golden Ratio Spiral Visualizer */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+                    <GoldenRatioSpiral 
+                        progress={progress} 
+                        isCalibrating={[33, 66, 99].includes(count)} 
+                        size={220}
+                    />
+                </div>
 
                 {/* Animated Counter Number */}
                 <AnimatePresence mode="wait">
@@ -127,6 +131,7 @@ export const TasbihCounter = memo(() => {
     const { t, language } = useLanguage();
     const { celebrate } = useCelebration();
     const [showCelebration, setShowCelebration] = useState(false);
+    const { prayerTimes } = usePrayerTimes();
 
     const { count, target, increment, reset, setTarget, progress } = useCounter({
         initialCount: 0,
@@ -136,14 +141,47 @@ export const TasbihCounter = memo(() => {
             celebrate();
             announceTasbihComplete(target, language);
             // Reset celebration after animation
-            setTimeout(() => setShowCelebration(false), 3000);
+            setTimeout(() => setShowCelebration(false), 3300);
         },
+    });
+
+    // Sync to Widget
+    useWidgetUpdater(prayerTimes ? {
+        fajr: prayerTimes.fajr,
+        dhuhr: prayerTimes.dhuhr,
+        asr: prayerTimes.asr,
+        maghrib: prayerTimes.maghrib,
+        isha: prayerTimes.isha,
+        city: prayerTimes.city || localStorage.getItem('last_city') || 'Cairo'
+    } : null, {
+        count,
+        target,
+        title: language === 'ar' ? 'التسبيح' : 'Tasbih'
     });
 
     // Announce count changes for screen readers
     const handleIncrement = () => {
+        const nextCount = count + 1;
         increment();
-        announceTasbihCount(count + 1, target, language);
+        announceTasbihCount(nextCount, target, language);
+
+        // Physicalized Bead Haptic: Subtle "double-click" feel
+        // This mimics a bead passing through fingers (resistance then release)
+        triggerPatternHaptic([10, 30, 10]);
+
+        // Numerical Harmony Haptics
+        if (nextCount === 33) {
+            triggerPatternHaptic(HAPTIC_PATTERNS.RECOGNITION_3);
+        } else if (nextCount === 66) {
+            triggerPatternHaptic(HAPTIC_PATTERNS.ALIGNMENT_6);
+        } else if (nextCount === 99 || (target > 0 && nextCount === target)) {
+            triggerPatternHaptic(HAPTIC_PATTERNS.COMPLETION_9);
+        }
+        
+        // Fibonacci Pulse for major milestones (every 100 if target 0, or on target reached)
+        if (target === 0 && nextCount % 100 === 0) {
+           triggerPatternHaptic(HAPTIC_PATTERNS.FIBONACCI);
+        }
     };
 
     return (

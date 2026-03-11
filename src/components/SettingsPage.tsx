@@ -35,8 +35,7 @@ export const SettingsPage = ({ isEmbedded = false }: SettingsPageProps) => {
         setFontFamily,
         quranFont,
         setQuranFont,
-        readingStyle,
-        setReadingStyle
+
     } = useSettings();
 
     // Tahqiq System
@@ -241,39 +240,7 @@ export const SettingsPage = ({ isEmbedded = false }: SettingsPageProps) => {
                         </div>
                     </Card>
 
-                    {/* Quran Settings */}
-                    <Card className="p-6 border-emerald-deep/5 bg-white/60 backdrop-blur-sm shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <BookOpen className="w-5 h-5 text-emerald-deep" />
-                            <h3 className="text-lg font-bold font-amiri text-emerald-deep">
-                                {language === "ar" ? "إعدادات المصحف" : "Quran Settings"}
-                            </h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label className="text-emerald-deep/80 font-amiri">
-                                    {language === "ar" ? "الرواية" : "Reading Style"}
-                                </Label>
-                                <Select
-                                    value={readingStyle}
-                                    onValueChange={(val) => setReadingStyle(val as "hafs" | "warsh")}
-                                >
-                                    <SelectTrigger className="bg-white border-emerald-deep/10 text-emerald-deep">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="hafs">
-                                            {language === "ar" ? "حفص عن عاصم (الافتراضي)" : "Hafs an Asim (Default)"}
-                                        </SelectItem>
-                                        <SelectItem value="warsh">
-                                            {language === "ar" ? "ورش عن نافع" : "Warsh an Nafi"}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </Card>
+                    {/* Quran Settings - Reading Style removed as only Hafs is supported */}
 
                     {/* Appearance */}
                     <Card className="p-6 border-emerald-deep/5 bg-white/60 backdrop-blur-sm shadow-sm">

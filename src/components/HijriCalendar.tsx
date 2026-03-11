@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const HijriCalendar = () => {
+export const HijriCalendar = memo(() => {
     const { language } = useLanguage();
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -268,14 +269,13 @@ export const HijriCalendar = () => {
                 </div>
             </div>
 
-            {/* Note Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="bg-[#1a2e26] border-emerald-800 text-white">
+                <DialogContent className="bg-cream border-emerald-deep/10 text-emerald-deep shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle className="font-amiri text-[#FFD700]">
+                        <DialogTitle className="font-amiri text-2xl text-emerald-deep">
                             {language === 'ar' ? 'إضافة ملاحظة' : 'Add Note'}
                         </DialogTitle>
-                        <DialogDescription className="text-white/60">
+                        <DialogDescription className="text-emerald-deep/60">
                             {selectedDate?.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </DialogDescription>
                     </DialogHeader>
@@ -284,14 +284,14 @@ export const HijriCalendar = () => {
                             value={noteContent}
                             onChange={(e) => setNoteContent(e.target.value)}
                             placeholder={language === 'ar' ? "اكتب ملاحظتك هنا..." : "Write your note here..."}
-                            className="bg-black/20 border-white/10 text-white min-h-[100px]"
+                            className="bg-white border-emerald-deep/10 text-emerald-deep min-h-[100px] focus:ring-emerald-deep/20"
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-white/60 hover:text-white">
+                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-emerald-deep/60 hover:text-emerald-deep hover:bg-emerald-deep/5">
                             {language === 'ar' ? 'إلغاء' : 'Cancel'}
                         </Button>
-                        <Button onClick={saveNote} className="bg-[#FFD700] text-[#094231] hover:bg-[#FFD700]/90">
+                        <Button onClick={saveNote} className="bg-gold-matte text-white hover:bg-gold-light hover:scale-105 transition-transform shadow-md shadow-gold-matte/20">
                             {language === 'ar' ? 'حفظ' : 'Save'}
                         </Button>
                     </DialogFooter>
@@ -299,4 +299,5 @@ export const HijriCalendar = () => {
             </Dialog>
         </div>
     );
-};
+});
+HijriCalendar.displayName = "HijriCalendar";

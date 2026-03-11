@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { triggerHaptic } from "@/lib/haptics";
 import confetti from "canvas-confetti";
+import { formatDuration } from "@/lib/format-utils";
 
 // Prayer labels with icons
 const PRAYER_KEYS: PrayerType[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -292,8 +293,8 @@ export const QadaCalculator = () => {
                                     key={s}
                                     onClick={() => setStrategy(s)}
                                     className={`p-3 rounded-xl border-2 transition-all text-start ${strategy === s
-                                            ? 'border-emerald-deep bg-emerald-deep/10 shadow-md'
-                                            : 'border-gray-200 hover:border-emerald-deep/50'
+                                        ? 'border-emerald-deep bg-emerald-deep/10 shadow-md'
+                                        : 'border-gray-200 hover:border-emerald-deep/50'
                                         }`}
                                 >
                                     <span className={`font-bold text-sm ${strategy === s ? 'text-emerald-deep' : 'text-gray-700'}`}>
@@ -318,7 +319,7 @@ export const QadaCalculator = () => {
                                 <Slider
                                     value={[customDaily]}
                                     min={1}
-                                    max={20}
+                                    max={100}
                                     step={1}
                                     onValueChange={(val) => setCustomDaily(val[0])}
                                     className="py-2"
@@ -336,7 +337,7 @@ export const QadaCalculator = () => {
                                     {getText('estimatedTime', 'المدة المتوقعة', 'Estimated Time')}
                                 </p>
                                 <p className="font-bold text-lg text-emerald-deep">
-                                    {estimatedDays === Infinity ? '∞' : `${Math.ceil(estimatedDays / 365)} ${getText('yearsShort', 'سنة', 'years')}`}
+                                    {formatDuration(estimatedDays, language as 'ar' | 'en')}
                                 </p>
                             </div>
                             <div className="w-[1px] h-12 bg-gold-matte/20" />
@@ -432,7 +433,7 @@ export const QadaCalculator = () => {
                             {getText('daysRemaining', 'أيام متبقية', 'Days Remaining')}
                         </p>
                         <p className="text-2xl font-bold text-emerald-deep">
-                            {remainingDays === Infinity ? '∞' : remainingDays.toLocaleString()}
+                            {formatDuration(remainingDays, language as 'ar' | 'en')}
                         </p>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-emerald-deep/10 shadow-sm">
@@ -520,8 +521,8 @@ export const QadaCalculator = () => {
                                     className={`flex flex-col items-center ${achieved ? 'text-gold-matte' : 'text-gray-300'}`}
                                 >
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${achieved
-                                            ? 'bg-gold-matte/20 border-gold-matte'
-                                            : 'bg-gray-100 border-gray-200'
+                                        ? 'bg-gold-matte/20 border-gold-matte'
+                                        : 'bg-gray-100 border-gray-200'
                                         }`}>
                                         {achieved ? (
                                             <CheckCircle2 className="w-5 h-5" />

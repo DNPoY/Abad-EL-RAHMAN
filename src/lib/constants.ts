@@ -6,11 +6,24 @@ import { TasbihTarget } from "@/types/tasbih";
 export const TASBIH_TARGETS: readonly TasbihTarget[] = [33, 100, 0] as const;
 
 export const VIBRATION_PATTERNS = {
-    LIGHT: 10,
-    MEDIUM: 20,
-    HEAVY: 30,
-    SUCCESS: [50, 50, 50] as number[],
-    LONG_PRESS: [0, 100, 50, 100] as number[],
+    LIGHT: 9, // 10 -> 9ms
+    MEDIUM: 18, // 20 -> 18ms (1+8=9)
+    HEAVY: 27, // 30 -> 27ms (2+7=9)
+    SUCCESS: [36, 63, 90] as number[], // Rhythmic progression of 9s
+    LONG_PRESS: [0, 108, 54, 108] as number[], // Sacred harmonic 108
+} as const;
+
+/**
+ * Numerical Harmony Haptic Patterns
+ * Patterns follow [vibrate, pause, vibrate, pause, ...] in ms
+ */
+export const HAPTIC_PATTERNS = {
+    // Fibonacci: 1, 1, 2, 3, 5, 8, 13 (approx in ms, scaled for feel)
+    FIBONACCI: [10, 50, 10, 50, 20, 50, 30, 50, 50, 50, 80, 50, 130],
+    // 3-6-9 Pulse Patterns
+    RECOGNITION_3: [30, 100, 30, 100, 30],           // 3 short taps
+    ALIGNMENT_6: [60, 150, 60, 150, 60, 150, 60, 150, 60, 150, 60], // 6 medium taps
+    COMPLETION_9: [100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100], // 9 long deep pulses
 } as const;
 
 /**
@@ -18,10 +31,10 @@ export const VIBRATION_PATTERNS = {
  */
 export const ANIMATION_DURATIONS = {
     INSTANT: 0,
-    FAST: 150,
-    MEDIUM: 300,
-    SLOW: 600,
-    VERY_SLOW: 1000,
+    FAST: 333,
+    MEDIUM: 666,
+    SLOW: 999,
+    VERY_SLOW: 1618, // Golden Ratio Phi
 } as const;
 
 /**
@@ -52,7 +65,7 @@ export const Z_INDEX = {
  * Developer Mode
  */
 export const DEV_MODE = {
-    PASSWORD: 'AllahAkbar@33',
+    PASSWORD: 'Allahakbar99',
     TAP_COUNT_TRIGGER: 7,
     STORAGE_KEY: 'devMode',
     DATE_STORAGE_KEY: 'devModeDate',

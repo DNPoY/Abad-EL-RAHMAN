@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,25 +10,27 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useState } from "react";
 import { cn, removeTashkil } from "@/lib/utils";
 import { toast } from "sonner";
-import { TasbihCounter } from "@/components/TasbihCounter";
 import { useFontSize } from "@/contexts/FontSizeContext";
 import { Share } from '@capacitor/share';
 import {
-    personalDuas,
     duaForDeceasedMale,
     duaForDeceasedFemale,
     quranicDuas,
     propheticDuas,
     leavingHomeDuas,
+    eventBasedDuas,
     DuaItem,
 } from "@/lib/dua-data";
+import { useEventDuas } from "@/hooks/useEventDuas";
+import { Sparkles } from "lucide-react";
 
-export const DuaList = () => {
+export const DuaList = memo(() => {
     const { t, language } = useLanguage();
     const { fontSize } = useFontSize();
     const { favorites, toggleFavorite, isFavorite } = useFavorites();
     const [searchQuery, setSearchQuery] = useState("");
     const debouncedSearchQuery = useDebounce(searchQuery, 300);
+    const { suggestedDuas } = useEventDuas();
 
     const getFontSizeClass = () => {
         switch (fontSize) {
@@ -41,11 +44,10 @@ export const DuaList = () => {
     const allDuas = [
         ...quranicDuas,
         ...propheticDuas,
-        ...personalDuas,
-        ...duaForDeceasedMale,
         ...duaForDeceasedMale,
         ...duaForDeceasedFemale,
         ...leavingHomeDuas,
+        ...eventBasedDuas,
     ];
 
     const filterDuas = (duas: DuaItem[]) => {
@@ -75,8 +77,9 @@ export const DuaList = () => {
             });
         } catch (err) {
             console.error('Error sharing:', err);
-            // Verify if user cancelled or real error. Fallback copy only if needed?
-            // Usually Share plugin handles availability check internally.
+            // Fallback to copy if Share API fails (e.g., on desktop browsers)
+            navigator.clipboard.writeText(text);
+            toast.success(language === "ar" ? "تم النسخ إلى الحافظة (المشاركة غير مدعومة)" : "Copied to clipboard (Share not supported)");
         }
     };
 
@@ -177,11 +180,23 @@ export const DuaList = () => {
                             {dua.arabic}
                         </p>
 
-                        {dua.source && (
-                            <p className="text-sm text-emerald-deep/60 font-amiri text-right mb-2" dir="rtl">
-                                {dua.source}
-                            </p>
-                        )}
+                        <div className="flex flex-col gap-1 text-sm text-emerald-deep/60 font-amiri text-right mb-2" dir="rtl">
+                            {dua.speaker && (
+                                <p className="font-semibold text-emerald-deep/80">
+                                    {language === "ar" ? "القائل: " : "Speaker: "}{dua.speaker}
+                                </p>
+                            )}
+                            {dua.context && (
+                                <p>
+                                    {language === "ar" ? "المناسبة/المكان: " : "Context: "}{dua.context}
+                                </p>
+                            )}
+                            {dua.source && (
+                                <p>
+                                    {language === "ar" ? "المصدر: " : "Source: "}{dua.source}
+                                </p>
+                            )}
+                        </div>
 
                         {language === "en" && (dua.transliteration || dua.translation) && (
                             <>
@@ -234,16 +249,25 @@ export const DuaList = () => {
                 <TabsTrigger value="deceased-female" className="min-w-fit px-4 font-amiri text-sm py-2 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm">
                     {t.duaForDeceasedFemale}
                 </TabsTrigger>
+                <TabsTrigger value="event-based" className="min-w-fit px-4 font-amiri text-sm py-2 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                    {t.eventBasedDua}
+                </TabsTrigger>
                 <TabsTrigger value="favorites" className="min-w-fit px-4 font-amiri text-sm py-2 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm">
                     <Heart className="w-4 h-4 inline-block mr-2" />
                     {t.favorites}
                 </TabsTrigger>
-                <TabsTrigger value="tasbih" className="min-w-fit px-4 font-amiri text-sm py-2 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                    {t.tasbih}
-                </TabsTrigger>
             </TabsList>
 
             <TabsContent value="personal" className="space-y-8">
+                {suggestedDuas.length > 0 && (
+                    <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="flex items-center gap-2 mb-4 text-emerald-deep/80 font-amiri text-lg font-bold">
+                            <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                            <span>{t.suggestedForYou}</span>
+                        </div>
+                        {renderDuaList(suggestedDuas)}
+                    </div>
+                )}
                 <div>
                     <h3 className="text-xl font-amiri text-primary mb-4 border-b pb-2">
                         {t.quranicDua}
@@ -257,15 +281,6 @@ export const DuaList = () => {
                     </h3>
                     {renderDuaList(propheticDuas)}
                 </div>
-
-                {personalDuas.length > 0 && personalDuas[0].arabic !== "سيتم إضافة الأدعية قريباً" && (
-                    <div>
-                        <h3 className="text-xl font-amiri text-primary mb-4 border-b pb-2">
-                            {t.personalDua}
-                        </h3>
-                        {renderDuaList(personalDuas)}
-                    </div>
-                )}
             </TabsContent>
 
             <TabsContent value="leaving-home" className="space-y-4">
@@ -280,16 +295,17 @@ export const DuaList = () => {
                 {renderDuaList(duaForDeceasedFemale)}
             </TabsContent>
 
+            <TabsContent value="event-based" className="space-y-4">
+                {renderDuaList(eventBasedDuas)}
+            </TabsContent>
+
             <TabsContent value="favorites" className="space-y-4">
                 <h3 className="text-xl font-amiri text-primary mb-4 border-b pb-2">
                     {t.favoriteDuas}
                 </h3>
                 {renderDuaList(getFavoriteDuas())}
             </TabsContent>
-
-            <TabsContent value="tasbih" className="space-y-4">
-                <TasbihCounter />
-            </TabsContent>
         </Tabs>
     );
-};
+});
+DuaList.displayName = "DuaList";

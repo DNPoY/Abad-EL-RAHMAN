@@ -237,5 +237,74 @@
         </LinearLayout>
 
     </LinearLayout>
+    
+    <!-- Protection Status Section (Glassmorphic) -->
+    <LinearLayout
+        android:id="@+id/protection_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_fajr"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/widget_bg_glass"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/protection_status"
+            android:textColor="#C5A059"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:alpha="0.9" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+            
+            <TextView
+                android:id="@+id/widget_next_prayer_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Next: Maghrib"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_dhikr_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="33/100"
+                android:textColor="#C5A059"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/widget_dhikr_progress"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="6dp"
+            android:progress="33"
+            android:max="100"
+            android:progressTint="#C5A059"
+            android:progressBackgroundTint="#40ffffff" />
+            
+        <TextView
+            android:id="@+id/widget_current_dhikr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SubhanAllah"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:layout_marginTop="4dp"
+            android:alpha="0.7" />
+    </LinearLayout>
 
 </RelativeLayout>

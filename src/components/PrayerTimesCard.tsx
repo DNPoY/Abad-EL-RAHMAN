@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePrayerTimes } from "@/contexts/PrayerTimesContext";
 import { useNotification } from "@/contexts/NotificationContext";
-import { MapPin, Bell, BellOff } from "lucide-react";
+import { MapPin, Bell, BellOff, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useSystemLog } from "@/hooks/useSystemLog";
+import confetti from "canvas-confetti";
 import {
   getAccessiblePrayerLabel,
   getAccessibleBellLabel,
@@ -24,10 +26,11 @@ const getPeriod = (time24: string): string => {
   return hours >= 12 ? "م" : "ص"; // Arabic AM/PM for the design
 }
 
-export const PrayerTimesCard = () => {
+export const PrayerTimesCard = memo(() => {
   const { t, language } = useLanguage();
   const { prayerTimes, nextPrayer, loading } = usePrayerTimes();
   const { settings, updateSettings } = useNotification();
+  const { todayLog, togglePrayer, isDayPerfect } = useSystemLog();
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -51,6 +54,27 @@ export const PrayerTimesCard = () => {
       }
     });
     toast.success(!current ? (language === "ar" ? "تم تفعيل التنبيهات" : "Notifications enabled") : (language === "ar" ? "تم تعطيل التنبيهات" : "Notifications disabled"));
+  };
+
+  const handleTogglePrayer = (key: string) => {
+      togglePrayer(key as any);
+      if (!todayLog.prayers[key as keyof typeof todayLog.prayers]) {
+          // If just completed
+          if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+          
+          // Check if today is now perfect
+          const prayersDone = Object.values(todayLog.prayers).filter(Boolean).length;
+          const azkarDone = Object.values(todayLog.azkar).filter(Boolean).length;
+          if (prayersDone === 4 && azkarDone === 2 && !todayLog.prayers[key as keyof typeof todayLog.prayers]) {
+              // This was the last one!
+              confetti({
+                  particleCount: 100,
+                  spread: 70,
+                  origin: { y: 0.6 }
+              });
+              toast.success(language === "ar" ? "رائع! أتممت تناغم اليوم" : "Perfect! You reached today's harmony");
+          }
+      }
   };
 
   if (loading) return <div className="h-64 flex items-center justify-center text-[#FFD700] animate-pulse">Loading...</div>;
@@ -143,7 +167,7 @@ export const PrayerTimesCard = () => {
                 language
               )}
               className={cn(
-                "group relative flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300",
+                "group relative flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-[369ms]",
                 isNext
                   ? "bg-emerald-deep text-white shadow-md shadow-emerald-deep/20 scale-[1.01]"
                   : "bg-white text-emerald-deep hover:bg-emerald-50 shadow-sm border border-emerald-deep/5"
@@ -189,10 +213,30 @@ export const PrayerTimesCard = () => {
                   {getPeriod(prayer.time)}
                 </span>
               </div>
+
+              {/* Completion Toggle */}
+              {prayer.key !== 'sunrise' && (
+                  <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleTogglePrayer(prayer.key);
+                    }}
+                    className={cn(
+                        "mr-4 w-10 h-10 rounded-full flex items-center justify-center transition-all",
+                        todayLog.prayers[prayer.key as keyof typeof todayLog.prayers]
+                            ? "bg-gold-matte text-white shadow-inner"
+                            : "bg-emerald-deep/5 text-emerald-deep/20 hover:bg-emerald-deep/10"
+                    )}
+                    title={language === "ar" ? "تحديد كمكتمل" : "Mark as completed"}
+                  >
+                    <CheckCircle2 className={cn("w-6 h-6", todayLog.prayers[prayer.key as keyof typeof todayLog.prayers] && "scale-110")} />
+                  </button>
+              )}
             </div>
           );
         })}
       </div>
     </div>
   );
-};
+});
+PrayerTimesCard.displayName = "PrayerTimesCard";

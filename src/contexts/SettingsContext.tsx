@@ -13,7 +13,8 @@ export interface SettingsState {
     azanVolume: number;
     smartDnd: boolean;
     azanFadeIn: boolean;
-    readingStyle: "hafs" | "warsh";
+    theme: "default" | "makkah-midnight" | "madinah-dawn" | "andalusian-gold";
+
 }
 
 interface SettingsContextType extends SettingsState {
@@ -27,7 +28,8 @@ interface SettingsContextType extends SettingsState {
     setAzanVolume: (volume: number) => void;
     setSmartDnd: (enabled: boolean) => void;
     setAzanFadeIn: (enabled: boolean) => void;
-    setReadingStyle: (style: "hafs" | "warsh") => void;
+    setTheme: (theme: "default" | "makkah-midnight" | "madinah-dawn" | "andalusian-gold") => void;
+
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -98,6 +100,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return saved ? saved === "true" : true;
     });
 
+    const [theme, setThemeState] = useState<"default" | "makkah-midnight" | "madinah-dawn" | "andalusian-gold">(() => {
+        const saved = localStorage.getItem("app-theme");
+        return (saved as any) || "default";
+    });
+
+    // Apply theme globally
+    useEffect(() => {
+        const root = document.documentElement;
+        if (theme === "default") {
+            root.removeAttribute("data-theme");
+        } else {
+            root.setAttribute("data-theme", theme);
+        }
+    }, [theme]);
+
     // Apply font globally
     useEffect(() => {
         const root = document.documentElement;
@@ -160,15 +177,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         WidgetBridge.setAzanFadeIn({ enabled }).catch(err => console.error("Failed to set azanFadeIn", err));
     };
 
-    const [readingStyle, setReadingStyleState] = useState<"hafs" | "warsh">(() => {
-        const saved = localStorage.getItem("readingStyle");
-        return (saved as "hafs" | "warsh") || "hafs";
-    });
-
-    const setReadingStyle = (style: "hafs" | "warsh") => {
-        setReadingStyleState(style);
-        localStorage.setItem("readingStyle", style);
+    const setTheme = (t: "default" | "makkah-midnight" | "madinah-dawn" | "andalusian-gold") => {
+        setThemeState(t);
+        localStorage.setItem("app-theme", t);
     };
+
+
 
     return (
         <SettingsContext.Provider
@@ -184,6 +198,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 azanVolume,
                 smartDnd,
                 azanFadeIn,
+                theme,
                 setCalculationMethod,
                 setMadhab,
                 setLocationMode,
@@ -194,8 +209,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 setAzanVolume,
                 setSmartDnd,
                 setAzanFadeIn,
-                readingStyle,
-                setReadingStyle,
+                setTheme,
             }}
         >
             {children}

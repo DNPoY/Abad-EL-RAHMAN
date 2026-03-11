@@ -1,30 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
-import { PrayerTimesCard } from "@/components/PrayerTimesCard";
-import { QiblaCompass } from "@/components/QiblaCompass";
-import { AzkarList } from "@/components/AzkarList";
-import { DuaList } from "@/components/DuaList";
-import { NotificationSettings } from "@/components/NotificationSettings";
-import { FontSizeSelector } from "@/components/FontSizeSelector";
-import { AlarmSettings } from "@/components/AlarmSettings";
-import { SettingsPage } from "@/components/SettingsPage";
-import { AlarmChallenge } from "@/components/AlarmChallenge";
-import { LanguageToggle } from "@/components/LanguageToggle";
-import { OfflineBanner } from "@/components/OfflineBanner";
-import { Clock, Compass, BookOpen, Settings, Calendar, Moon, Heart, ClipboardList, Terminal, MapPin } from "lucide-react";
-import { HijriDateDisplay } from "@/components/HijriDateDisplay";
-import { getHijriYear } from "@/lib/date-utils";
-import { HijriCalendar } from "@/components/HijriCalendar";
-import { QuranIndex } from "@/components/QuranIndex";
-import { SunnahPrayers } from "@/components/SunnahPrayers";
-import { QadaCalculator } from "@/components/QadaCalculator";
-import { MasjidFinder } from "@/components/MasjidFinder";
-import { DeveloperPanel } from "@/components/DeveloperPanel";
-import { DockNavigation } from "@/components/DockNavigation";
+import { Clock, Compass, BookOpen, Settings, Calendar, Moon, Heart, ClipboardList, Terminal, MapPin, GraduationCap, Calculator, Bookmark, Hash, Sparkles, TrendingUp } from "lucide-react";
 import { useVibration } from "@/hooks/useVibration";
 import { cn } from "@/lib/utils";
+import { useVoiceCommands } from "@/hooks/useVoiceCommands";
+import { getHijriDate, getHijriYear } from "@/lib/date-utils";
+import { getHijriEvents } from "@/lib/islamic-events";
+
+// Light components - always loaded (small, always visible)
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { HijriDateDisplay } from "@/components/HijriDateDisplay";
+import { DockNavigation } from "@/components/DockNavigation";
+import { AlarmChallenge } from "@/components/AlarmChallenge";
 
 import {
   Dialog,
@@ -36,6 +26,35 @@ import { Button } from "@/components/ui/button";
 import { PermissionsPrompt } from "@/components/PermissionsPrompt";
 import patternBg from "@/assets/pattern.png";
 
+// Heavy components - lazy loaded (only when user navigates to them)
+const PrayerTimesCard = lazy(() => import("@/components/PrayerTimesCard").then(m => ({ default: m.PrayerTimesCard })));
+const QiblaCompass = lazy(() => import("@/components/QiblaCompass").then(m => ({ default: m.QiblaCompass })));
+const AzkarList = lazy(() => import("@/components/AzkarList").then(m => ({ default: m.AzkarList })));
+const DuaList = lazy(() => import("@/components/DuaList").then(m => ({ default: m.DuaList })));
+const SettingsPage = lazy(() => import("@/components/SettingsPage").then(m => ({ default: m.SettingsPage })));
+const HijriCalendar = lazy(() => import("@/components/HijriCalendar").then(m => ({ default: m.HijriCalendar })));
+const QuranIndex = lazy(() => import("@/components/QuranIndex").then(m => ({ default: m.QuranIndex })));
+const SunnahPrayers = lazy(() => import("@/components/SunnahPrayers").then(m => ({ default: m.SunnahPrayers })));
+const QadaCalculator = lazy(() => import("@/components/QadaCalculator").then(m => ({ default: m.QadaCalculator })));
+const MasjidFinder = lazy(() => import("@/components/MasjidFinder").then(m => ({ default: m.MasjidFinder })));
+const DeveloperPanel = lazy(() => import("@/components/DeveloperPanel").then(m => ({ default: m.DeveloperPanel })));
+const TajweedPage = lazy(() => import("@/components/TajweedPage").then(m => ({ default: m.TajweedPage })));
+const KhatmaPlanner = lazy(() => import("@/components/KhatmaPlanner").then(m => ({ default: m.KhatmaPlanner })));
+const TasbihCounter = lazy(() => import("@/components/TasbihCounter").then(m => ({ default: m.TasbihCounter })));
+const AsmaUlHusna = lazy(() => import("@/components/AsmaUlHusna").then(m => ({ default: m.AsmaUlHusna })));
+const ZakatCalculator = lazy(() => import("@/components/ZakatCalculator").then(m => ({ default: m.ZakatCalculator })));
+const VoiceCommandOverlay = lazy(() => import("@/components/VoiceCommandOverlay").then(m => ({ default: m.VoiceCommandOverlay })));
+const QuickShield = lazy(() => import("@/components/QuickShield").then(m => ({ default: m.QuickShield })));
+const HarmonyLevels = lazy(() => import("@/components/HarmonyLevels").then(m => ({ default: m.HarmonyLevels })));
+const MilestoneRewards = lazy(() => import("@/components/MilestoneRewards").then(m => ({ default: m.MilestoneRewards })));
+
+// Lazy loading fallback
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="w-9 h-9 border-3 border-emerald-deep/20 border-t-emerald-deep rounded-full animate-spin" />
+  </div>
+);
+
 const Index = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
@@ -44,6 +63,52 @@ const Index = () => {
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const { vibrateLight } = useVibration();
+
+  const handleNextEventCommand = () => {
+    const now = new Date();
+    const hijriDate = getHijriDate(now, language as "ar" | "en");
+    
+    // Find next event
+    const month = now.getMonth(); // This is Gregorian, need Hijri month
+    // Simplified: check current month events
+    const dummyDate = new Date();
+    // Native Intl approach to get Hijri month index (0-11)
+    const hijriMonth = parseInt(new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {month: "numeric"}).format(now)) - 1;
+    const events = getHijriEvents(hijriMonth, now.getFullYear()); // simplified year
+    const nextEvent = events.find(e => e.day >= now.getDate()); // very rough estimate
+    
+    let feedback = language === "ar" 
+      ? `التاريخ اليوم هو ${hijriDate}.` 
+      : `Today is ${hijriDate}.`;
+    
+    if (nextEvent) {
+      feedback += language === "ar"
+        ? ` الحدث القادم هو ${nextEvent.title.ar} يوم ${nextEvent.day}.`
+        : ` The next event is ${nextEvent.title.en} on day ${nextEvent.day}.`;
+    }
+
+    return feedback;
+  };
+
+  const voiceCommands = useMemo(() => [
+    {
+      keywords: ["start recovery protocol", "recovery protocol", "بدء بروتوكول الاستعادة"],
+      action: () => {
+        setActiveTab("azkar");
+      },
+      feedback: language === "ar" ? "تم بدء بروتوكول الاستعادة. عرض الأذكار." : "Recovery Protocol started. Displaying Azkar."
+    },
+    {
+      keywords: ["calculate next event", "next event", "احسب الحدث القادم"],
+      action: () => {
+        const feedback = handleNextEventCommand();
+        speakFeedback(feedback);
+      },
+      feedback: "" // Handled in action
+    }
+  ], [language]);
+
+  const { isListening, isSupported, toggleListening, speakFeedback } = useVoiceCommands(voiceCommands);
 
   const [showDevPassword, setShowDevPassword] = useState(false);
   const [devPasswordInput, setDevPasswordInput] = useState("");
@@ -66,7 +131,7 @@ const Index = () => {
   };
 
   const verifyDevPassword = () => {
-    if (devPasswordInput === "AllahAkbar@33") {
+    if (devPasswordInput === "Allahakbaar16899@33") {
       localStorage.setItem("devMode", "true");
       localStorage.setItem("devModeDate", new Date().toDateString());
       setDevModeEnabled(true);
@@ -81,9 +146,15 @@ const Index = () => {
   // Custom Icons for Bottom Nav - Restoring ALL original tabs
   const navItems = [
     { id: "prayers", label: t.prayerTimes, icon: Clock },
+    { id: "progress", label: language === "ar" ? "التقدم" : "Progress", icon: TrendingUp },
     { id: "quran", label: language === "ar" ? "القرآن" : "Quran", icon: BookOpen },
     { id: "azkar", label: t.azkar, icon: Moon },
     { id: "dua", label: t.dua, icon: Heart },
+    { id: "asmaUlHusna", label: t.asmaUlHusna, icon: Sparkles },
+    { id: "tasbih", label: t.tasbih, icon: Hash },
+    { id: "zakat", label: t.zakatCalculator, icon: Calculator },
+    { id: "khatma", label: t.khatmaPlanner, icon: Bookmark },
+    { id: "tajweed", label: language === "ar" ? "تجويد" : "Tajweed", icon: GraduationCap },
     { id: "mosques", label: t.mosques, icon: MapPin },
     { id: "qibla", label: t.qibla, icon: Compass },
     { id: "calendar", label: language === "ar" ? "التقويم" : "Calendar", icon: Calendar },
@@ -96,9 +167,22 @@ const Index = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "prayers":
-        return <PrayerTimesCard />;
+        return (
+          <div className="space-y-6">
+            <PrayerTimesCard />
+          </div>
+        );
+      case "progress":
+        return (
+          <div className="space-y-6">
+            <HarmonyLevels />
+            <MilestoneRewards />
+          </div>
+        );
       case "quran":
         return <QuranIndex isEmbedded={true} />;
+      case "tajweed":
+        return <TajweedPage />;
       case "mosques":
         return <MasjidFinder />;
       case "qibla":
@@ -115,6 +199,14 @@ const Index = () => {
         return <DuaList />;
       case "qada":
         return <QadaCalculator />;
+      case "asmaUlHusna":
+        return <AsmaUlHusna />;
+      case "zakat":
+        return <ZakatCalculator />;
+      case "tasbih":
+        return <TasbihCounter />;
+      case "khatma":
+        return <KhatmaPlanner />;
       case "sunnah":
         return <SunnahPrayers />;
       case "settings":
@@ -128,6 +220,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-cream text-foreground font-sans flex flex-col relative overflow-hidden selection:bg-emerald-light selection:text-white">
+      {/* Background Breathing Glow - Moved here to fix jitter in long lists */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,rgba(16,185,129,0.1)_0%,transparent_70%)] animate-pulse-breathing" />
+
       {/* Background Texture Overlay */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply"
         style={{ backgroundImage: `url('/textures/cream-paper.png')`, backgroundSize: 'cover' }}>
@@ -172,7 +267,7 @@ const Index = () => {
             {/* Main Logo - Clickable for Dua/Message */}
             <div
               onClick={() => setIsDuaOpen(true)}
-              className="cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 group relative flex justify-center items-center"
+              className="cursor-pointer transition-transform duration-[369ms] hover:scale-[1.06] active:scale-[0.96] group relative flex justify-center items-center"
             >
               <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full opacity-50 pointer-events-none" />
               <img
@@ -230,13 +325,13 @@ const Index = () => {
             </div>
 
             <p className="font-tajawal text-base leading-relaxed text-emerald-deep/70">
-              نسألكم دعوة بظهر الغيب لمطور هذا التطبيق ووالدته المتوفاة.. اللهم ارحمهما، واغفر لهما، وثبتهما عند السؤال.
+              نسألكم دعوة بظهر الغيب لمطور هذا التطبيق وأمه من الرضاعة وأمه الحقيقية والبنت اللي ماتت زمان في مدرسة السحر وأهله وأموات المسلمين.. اللهم ارحمهم جميعاً، واغفر لهم، وثبتهم عند السؤال.
             </p>
           </div>
           <div className="flex justify-center">
             <Button
               onClick={() => setIsDuaOpen(false)}
-              className="bg-gold-matte text-white hover:bg-gold-light font-tajawal font-bold px-10 py-6 rounded-xl shadow-lg shadow-gold-matte/20 transition-all hover:scale-105"
+              className="bg-gold-matte text-white hover:bg-gold-light font-tajawal font-bold px-10 py-6 rounded-xl shadow-lg shadow-gold-matte/20 transition-all hover:scale-[1.06]"
             >
               اللهم آمين
             </Button>
@@ -250,7 +345,9 @@ const Index = () => {
         role="main"
         aria-label={language === "ar" ? "المحتوى الرئيسي" : "Main content"}
       >
-        {renderContent()}
+        <Suspense fallback={<LazyFallback />}>
+          {renderContent()}
+        </Suspense>
       </main>
 
       {/* Modern Floating Dock Navigation with Magnification */}
@@ -267,6 +364,15 @@ const Index = () => {
         }}
         language={language}
       />
+      
+      <Suspense fallback={null}>
+        <VoiceCommandOverlay 
+          isListening={isListening}
+          isSupported={isSupported}
+          toggleListening={toggleListening}
+        />
+        <QuickShield />
+      </Suspense>
     </div>
   );
 };

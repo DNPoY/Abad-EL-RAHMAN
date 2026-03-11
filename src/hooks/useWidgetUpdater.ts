@@ -12,7 +12,13 @@ interface PrayerTimesData {
     city: string;
 }
 
-export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null) => {
+interface DhikrData {
+    count: number;
+    target: number;
+    title: string;
+}
+
+export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null, dhikrData?: DhikrData) => {
     const { language } = useLanguage();
 
     useEffect(() => {
@@ -95,7 +101,10 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null) => {
                     nextPrayerName: prayerName, // Used for highlighting
                     nextPrayerTime: formattedTime, // Not used in new layout but good to keep
                     hijriDate: widgetDisplayDate,
-                    locationName: locationName
+                    locationName: locationName,
+                    dhikrProgress: dhikrData?.count,
+                    dhikrTarget: dhikrData?.target,
+                    currentDhikr: dhikrData?.title
                 });
                 console.log("Widget updated:", { prayerName, time: formattedTime, date: widgetDisplayDate, locationName });
 
@@ -112,6 +121,6 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null) => {
 
         return () => clearInterval(interval);
 
-    }, [prayerTimes, language]);
+    }, [prayerTimes, language, dhikrData]);
 };
 

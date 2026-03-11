@@ -56,6 +56,16 @@ const App = () => {
     // Initialize Firebase Remote Config
     RemoteConfigService.init(false).catch(console.error);
 
+    // Pause CSS animations when page is not visible (saves GPU/battery)
+    const handleVisibility = () => {
+      if (document.hidden) {
+        document.documentElement.classList.add('page-hidden');
+      } else {
+        document.documentElement.classList.remove('page-hidden');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     // Re-sync alarms when app comes to foreground
     const setupResumeListener = async () => {
       const resumeListener = await CapApp.addListener('appStateChange', async (state: { isActive: boolean }) => {
@@ -70,6 +80,7 @@ const App = () => {
     const cleanupPromise = setupResumeListener();
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       cleanupPromise.then(listener => listener.remove());
     };
   }, []);

@@ -47,7 +47,23 @@ export const useAzkarProgress = (type: "morning" | "evening" | "afterPrayer" | "
     // Save progress whenever it changes
     useEffect(() => {
         localStorage.setItem(getStorageKey(), JSON.stringify(progress));
-    }, [progress, getStorageKey]);
+
+        // Notify System Log if it's morning or evening azkar and all items are completed
+        if (type === 'morning' || type === 'evening') {
+            const azkarList = type === 'morning' 
+                ? JSON.parse(localStorage.getItem('azkar-morning-data') || '[]')
+                : JSON.parse(localStorage.getItem('azkar-evening-data') || '[]');
+            
+            if (azkarList.length > 0) {
+                const isAllCompleted = azkarList.every((item: any) => (progress[item.id] || 0) >= item.count);
+                if (isAllCompleted) {
+                    // We can't use useSystemLog here directly because it's a hook.
+                    // Instead, we dispatch a custom event that useSystemLog or a global sync can listen to.
+                    window.dispatchEvent(new CustomEvent('azkar-completed', { detail: { type } }));
+                }
+            }
+        }
+    }, [progress, getStorageKey, type]);
 
     // Optional: Clean up old keys (simple version: just let them be for now, or clear on load if date changed)
     // For a pro app, we might want to clear keys older than today to save space, 

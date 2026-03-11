@@ -11,6 +11,9 @@ export interface WidgetBridgePlugin {
         nextPrayerTime: string;
         hijriDate: string;
         locationName: string;
+        dhikrProgress?: number;
+        currentDhikr?: string;
+        dhikrTarget?: number;
     }): Promise<void>;
     openBatterySettings(): Promise<void>;
     scheduleAdhan(options: {
