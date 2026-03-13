@@ -105,9 +105,10 @@ export const DuaList = memo(() => {
                 {filteredList.map((dua, index) => (
                     <Card
                         key={dua.id}
-                        className="p-6 animate-fade-in hover:shadow-lg transition-all relative group bg-white border-emerald-deep/5 hover:-translate-y-1"
+                        className="p-6 animate-fade-in transition-all relative group shadow-sm hover:shadow-xl border-emerald-deep/5 hover:-translate-y-1 overflow-hidden"
                         style={{ animationDelay: `${index * 0.05}s` }}
                     >
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                         <div className="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                                 variant="ghost"

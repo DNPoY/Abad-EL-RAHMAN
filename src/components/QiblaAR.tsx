@@ -121,21 +121,28 @@ export const QiblaAR: React.FC<QiblaARProps> = ({ qiblaDirection, onClose }) => 
     }
 
     // Device Orientation Listener
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.alpha === null) return;
-
-      // alpha is rotation around Z axis [0, 360]
-      // beta is rotation around X axis [-180, 180]
-      // gamma is rotation around Y axis [-90, 90]
+    const handleOrientation = (event: any) => {
+      let alpha = 0;
       
-      const alpha = event.alpha;
+      // iOS
+      if (event.webkitCompassHeading !== undefined) {
+        alpha = event.webkitCompassHeading;
+      } 
+      // Android (Absolute)
+      else if (event.absolute === true && event.alpha !== null) {
+        alpha = event.alpha;
+      }
+      // Fallback
+      else if (event.alpha !== null) {
+        alpha = event.alpha;
+      }
+
       const beta = event.beta || 0;
       const gamma = event.gamma || 0;
 
       // Update camera rotation based on device orientation
-      // This is a simplified version. For full accuracy, complex quaternions are usually needed.
-      // But for a "radar" vibe, orienting the camera works.
-      
+      // Three.js Euler order: 'ZXY' for mobile device orientation
+      // alpha (Z), beta (X), gamma (Y)
       const yaw = THREE.MathUtils.degToRad(alpha);
       const pitch = THREE.MathUtils.degToRad(beta - 90);
       const roll = THREE.MathUtils.degToRad(gamma);
@@ -144,7 +151,11 @@ export const QiblaAR: React.FC<QiblaARProps> = ({ qiblaDirection, onClose }) => 
       setDeviceHeading(alpha);
     };
 
-    window.addEventListener("deviceorientation", handleOrientation);
+    if ("ondeviceorientationabsolute" in (window as any)) {
+      (window as any).addEventListener("deviceorientationabsolute", handleOrientation);
+    } else {
+      window.addEventListener("deviceorientation", handleOrientation as any);
+    }
 
     // Animation Loop
     const animate = () => {
@@ -161,7 +172,8 @@ export const QiblaAR: React.FC<QiblaARProps> = ({ qiblaDirection, onClose }) => 
 
     // Cleanup
     return () => {
-      window.removeEventListener("deviceorientation", handleOrientation);
+      (window as any).removeEventListener("deviceorientationabsolute", handleOrientation);
+      window.removeEventListener("deviceorientation", handleOrientation as any);
       if (rendererRef.current) {
         rendererRef.current.dispose();
       }
@@ -199,7 +211,13 @@ export const QiblaAR: React.FC<QiblaARProps> = ({ qiblaDirection, onClose }) => 
         {/* Alignment Indicator */}
         <div className="flex-1 flex items-center justify-center">
             <div className="w-64 h-64 border-2 border-white/10 rounded-full flex items-center justify-center">
-                <div className={`w-48 h-48 border-2 rounded-full transition-all duration-300 ${Math.abs((qiblaDirection - (360 - deviceHeading) + 360) % 360) < 5 ? 'border-emerald-400 scale-110 shadow-[0_0_20px_rgba(52,211,153,0.5)]' : 'border-white/30 scale-100'}`}>
+                {/* 
+                   Checking alignment:
+                   On iOS/Absolute Android, deviceHeading is the angle from North.
+                   qiblaDirection is also the angle from North.
+                   So we are aligned if deviceHeading is close to qiblaDirection.
+                */}
+                <div className={`w-48 h-48 border-2 rounded-full transition-all duration-300 ${Math.abs((qiblaDirection - deviceHeading + 360) % 360) < 5 || Math.abs((qiblaDirection - deviceHeading + 360) % 360) > 355 ? 'border-emerald-400 scale-110 shadow-[0_0_20px_rgba(52,211,153,0.5)]' : 'border-white/30 scale-100'}`}>
                    <div className="absolute inset-0 flex items-center justify-center">
                        <div className="w-1 h-12 bg-gold-matte rounded-full animate-pulse" />
                    </div>

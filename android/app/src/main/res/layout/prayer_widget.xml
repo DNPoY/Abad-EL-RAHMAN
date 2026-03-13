@@ -55,6 +55,7 @@
 
     <!-- Prayer Times Grid (5 Columns) -->
     <LinearLayout
+        android:id="@+id/prayer_grid_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/top_bar"
@@ -243,7 +244,7 @@
         android:id="@+id/protection_section"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/layout_fajr"
+        android:layout_below="@id/prayer_grid_container"
         android:layout_marginTop="16dp"
         android:background="@drawable/widget_bg_glass"
         android:orientation="vertical"

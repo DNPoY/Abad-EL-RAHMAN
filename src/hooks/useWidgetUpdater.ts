@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
-import WidgetBridge from "@/lib/widget-bridge";
+// import WidgetBridge from "@/lib/widget-bridge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PrayerTimesData {
@@ -92,6 +92,7 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null, dhikrData?
                     return `${h12}:${m.toString().padStart(2, '0')}`; // Minimalist: Just time. Use bold/color for context.
                 };
 
+                const { default: WidgetBridge } = await import("@/lib/widget-bridge");
                 await WidgetBridge.updateWidgetData({
                     fajr: formatTime(prayerTimes.fajr),
                     dhuhr: formatTime(prayerTimes.dhuhr),
@@ -116,8 +117,8 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null, dhikrData?
         // Update immediately
         updateWidget();
 
-        // Check every minute
-        const interval = setInterval(updateWidget, 60000);
+        // Check every 66 seconds (multiple of 3 & 6)
+        const interval = setInterval(updateWidget, 66000);
 
         return () => clearInterval(interval);
 

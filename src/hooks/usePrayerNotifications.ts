@@ -93,7 +93,7 @@ export const usePrayerNotifications = ({ prayerTimes }: UsePrayerNotificationsPr
       });
     };
 
-    checkIntervalRef.current = setInterval(checkPrayerTime, 60000);
+    checkIntervalRef.current = setInterval(checkPrayerTime, 66000);
     checkPrayerTime(); // Initial check
 
     return () => {

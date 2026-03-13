@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 import { surahs } from "@/lib/quran-data";
-import { Search, BookOpen, ArrowRight } from "lucide-react";
+import { Search, BookOpen, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import patternBg from "@/assets/pattern.png";
 import { removeTashkil } from "@/lib/utils";
@@ -60,12 +60,24 @@ export const QuranIndex = memo(({ isEmbedded = false }: QuranIndexProps) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [lastRead, setLastRead] = useState<any>(null);
     const [viewMode, setViewMode] = useState<'surah' | 'juz' | 'khatma'>('surah');
+    const [khatmaProgress, setKhatmaProgress] = useState(0);
 
     useEffect(() => {
         const saved = localStorage.getItem("last_read_position");
         if (saved) {
             try {
                 setLastRead(JSON.parse(saved));
+            } catch (e) { console.error(e); }
+        }
+
+        // Load Khatma progress for the quick view
+        const savedKhatma = localStorage.getItem("khatma-planner");
+        if (savedKhatma) {
+            try {
+                const data = JSON.parse(savedKhatma);
+                if (data.isActive && data.totalPages > 0) {
+                    setKhatmaProgress(Math.round((data.currentPage / data.totalPages) * 100));
+                }
             } catch (e) { console.error(e); }
         }
     }, []);
@@ -138,34 +150,74 @@ export const QuranIndex = memo(({ isEmbedded = false }: QuranIndexProps) => {
             />
 
             <div className="relative z-10 px-4 pt-safe pb-32 animate-fade-in">
-                {/* Continue Reading Card */}
-                {lastRead && !searchQuery && (
-                    <div className="max-w-xl mx-auto mb-6 px-1 animate-fade-in-up delay-100">
-                        <Link to={`/quran/${lastRead.surahId}${lastRead.ayahNumber ? `?ayah=${lastRead.ayahNumber}` : ''}`}>
-                            <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 rounded-2xl p-4 text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-between group border border-white/10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-white/10 rounded-full backdrop-blur-sm">
-                                        <BookOpen className="w-6 h-6 text-gold-matte" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-emerald-100/60 uppercase tracking-wider font-semibold mb-0.5">
-                                            {language === "ar" ? "تابع القراءة" : "Continue Reading"}
+                {/* Recently Read & Khatma Progress Side-by-Side */}
+                {!searchQuery && (
+                    <div className="max-w-xl mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
+                        {/* Last Read Card */}
+                        {lastRead ? (
+                            <Link to={`/quran/${lastRead.surahId}${lastRead.ayahNumber ? `?ayah=${lastRead.ayahNumber}` : ''}`} className="block h-full">
+                                <div className="h-full bg-gradient-to-br from-emerald-900 to-emerald-800 rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all border border-white/10 flex flex-col justify-between group">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                                            <BookOpen className="w-5 h-5 text-gold-matte" />
+                                        </div>
+                                        <p className="text-[10px] text-emerald-100/60 uppercase tracking-widest font-bold">
+                                            {language === "ar" ? "آخر قراءة" : "Last Read"}
                                         </p>
-                                        <h3 className="font-bold font-tajawal text-lg leading-none mt-1">
-                                            {lastRead.surahName}
-                                            <span className="mx-2 text-white/40 text-sm font-light">|</span>
-                                            <span className="text-sm font-normal text-emerald-100">
+                                    </div>
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <h3 className="font-bold font-tajawal text-xl">
+                                                {lastRead.surahName}
+                                            </h3>
+                                            <p className="text-xs text-emerald-100/80 mt-1">
                                                 {lastRead.ayahNumber
                                                     ? (language === "ar" ? `آية ${lastRead.ayahNumber}` : `Ayah ${lastRead.ayahNumber}`)
                                                     : (language === "ar" ? "صفحة" : "Page") + ` ${lastRead.pageNumber}`
                                                 }
-                                            </span>
-                                        </h3>
+                                            </p>
+                                        </div>
+                                        <ArrowRight className={`w-5 h-5 text-gold-matte transition-transform duration-[369ms] ${language === 'ar' ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                                     </div>
                                 </div>
-                                <ArrowRight className={`w-5 h-5 text-gold-matte transition-transform duration-[369ms] ${language === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
+                            </Link>
+                        ) : (
+                             <div className="h-full bg-emerald-deep/5 rounded-2xl p-5 border border-dashed border-emerald-deep/20 flex flex-col items-center justify-center text-center">
+                                <BookOpen className="w-8 h-8 text-emerald-deep/20 mb-2" />
+                                <p className="text-xs text-emerald-deep/40 font-tajawal">
+                                    {language === "ar" ? "ابدأ رحلتك مع القرآن" : "Start your Quran journey"}
+                                </p>
+                             </div>
+                        )}
+
+                        {/* Quick Khatma Progress */}
+                        <div 
+                            onClick={() => setViewMode('khatma')}
+                            className="bg-white rounded-2xl p-5 border border-emerald-deep/10 shadow-sm cursor-pointer hover:shadow-md transition-all flex flex-col justify-between group"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-emerald-50 rounded-lg">
+                                        <Sparkles className="w-5 h-5 text-gold-matte" />
+                                    </div>
+                                    <p className="text-[10px] text-emerald-deep/40 uppercase tracking-widest font-bold">
+                                        {language === "ar" ? "تقدم الختمة" : "Khatma Progress"}
+                                    </p>
+                                </div>
+                                <ArrowRight className={`w-4 h-4 text-emerald-deep/20 group-hover:text-emerald-deep transition-colors ${language === 'ar' ? 'rotate-180' : ''}`} />
                             </div>
-                        </Link>
+                            <div>
+                                <h3 className="font-bold font-tajawal text-xl text-emerald-deep">
+                                    {language === "ar" ? "متابعة الختمة" : "View Progress"}
+                                </h3>
+                                <div className="w-full bg-emerald-deep/5 h-1.5 rounded-full mt-3 overflow-hidden">
+                                    <div 
+                                        className="bg-gold-matte h-full rounded-full transition-all duration-700 ease-in-out" 
+                                        style={{ width: `${khatmaProgress}%` }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
+import { toast } from "sonner";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useWidgetUpdater } from "@/hooks/useWidgetUpdater";
@@ -32,6 +33,7 @@ interface PrayerTimesContextType {
     loading: boolean;
     refreshLocation: () => void;
     checkVerification: () => void;
+    setLocationByCity: (city: any) => void;
     corrections: CorrectionMap;
 }
 
@@ -39,7 +41,7 @@ const PrayerTimesContext = createContext<PrayerTimesContextType | undefined>(und
 
 export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
     const { t, language } = useLanguage();
-    const { calculationMethod, madhab, locationMode, manualLatitude, manualLongitude } = useSettings();
+    const { calculationMethod, madhab, locationMode, manualLatitude, manualLongitude, setLocationMode, setManualLocation, setCalculationMethod } = useSettings();
 
     const [prayerTimes, setPrayerTimes] = useState<PrayerTimesData | null>(() => {
         try {
@@ -85,7 +87,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
         return newTimes;
     };
 
-    const calculatePrayerTimes = useCallback((latitude: number, longitude: number) => {
+    const calculatePrayerTimes = useCallback((latitude: number, longitude: number, cityName?: string) => {
         try {
             const coordinates = new Coordinates(latitude, longitude);
             const date = new Date();
@@ -100,7 +102,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
                 case 0: params = CalculationMethod.Tehran(); break;
                 default: params = CalculationMethod.MuslimWorldLeague();
             }
-
+            
             if (madhab === "hanafi") {
                 params.madhab = Madhab.Hanafi;
             } else {
@@ -117,7 +119,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
                 asr: formatTime(prayerTimesCalc.asr),
                 maghrib: formatTime(prayerTimesCalc.maghrib),
                 isha: formatTime(prayerTimesCalc.isha),
-                city: locationMode === "manual" ? "Manual Location" : "Local Location",
+                city: cityName || (locationMode === "manual" ? (language === 'ar' ? "موقع يدوي" : "Manual Location") : (language === 'ar' ? "موقع محلي" : "Local Location")),
                 country: "",
             };
 
@@ -175,6 +177,14 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
     }, [prayerTimes, calculationMethod, madhab, manualLatitude, manualLongitude, locationMode, calculatePrayerTimes]);
 
 
+    const setLocationByCity = useCallback((city: any) => {
+        setLocationMode("manual");
+        setManualLocation(city.lat, city.lng);
+        setCalculationMethod(city.method);
+        calculatePrayerTimes(city.lat, city.lng, language === 'ar' ? city.names.ar : city.names.en);
+        toast.success(language === 'ar' ? `تم تحديد الموقع: ${city.names.ar}` : `Location set to ${city.names.en}`);
+    }, [calculatePrayerTimes, language, setCalculationMethod, setLocationMode, setManualLocation]);
+
     const refreshLocation = useCallback(() => {
         // Only show loading if we have absolutely no data
         if (!prayerTimes) setLoading(true);
@@ -202,10 +212,22 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
                 },
                 (error) => {
                     console.warn("Location fetch failed, using cache/defaults", error);
+                    // If we have absolutely no data yet (first run, no internet, GPS slow)
+                    // Use a reasonable default (Mecca) instead of staying empty
+                    if (!prayerTimes && !localStorage.getItem('lastKnownLocation')) {
+                        console.log("Fresh install offline: falling back to default location");
+                        const meccaLabel = language === 'ar' ? "مكة المكرمة (افتراضي)" : "Mecca (Default)";
+                        calculatePrayerTimes(21.3891, 39.8579, meccaLabel); // Default to Mecca
+                    }
                     setLoading(false);
                 },
-                { enableHighAccuracy: false, timeout: 6000, maximumAge: 540000 } // 6 seconds timeout, 9 mins cache
+                { enableHighAccuracy: false, timeout: 12940, maximumAge: 324000 } // Harmonic alignment (1.618 ratio & 324 constant)
             );
+        } else {
+            // No geolocation support: Fallback to Mecca immediately if no data
+            if (!prayerTimes) {
+                calculatePrayerTimes(21.3891, 39.8579);
+            }
         }
     }, [calculatePrayerTimes, locationMode, manualLatitude, manualLongitude, prayerTimes]);
 
@@ -306,7 +328,7 @@ export const PrayerTimesProvider = ({ children }: { children: ReactNode }) => {
     }, [prayerTimes, t]);
 
     return (
-        <PrayerTimesContext.Provider value={{ prayerTimes, nextPrayer, loading, refreshLocation, checkVerification, corrections }}>
+        <PrayerTimesContext.Provider value={{ prayerTimes, nextPrayer, loading, refreshLocation, checkVerification, setLocationByCity, corrections }}>
             {children}
         </PrayerTimesContext.Provider>
     );

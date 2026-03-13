@@ -12,6 +12,8 @@ import {
   getAccessibleBellLabel,
   getAccessibleClockLabel,
 } from "@/lib/accessibility";
+import { LocationSelector } from "./LocationSelector";
+import { useSettings } from "@/contexts/SettingsContext";
 
 // Helper to get just the time part (e.g., "12:34")
 const getTimeOnly = (time24: string): string => {
@@ -28,11 +30,13 @@ const getPeriod = (time24: string): string => {
 
 export const PrayerTimesCard = memo(() => {
   const { t, language } = useLanguage();
-  const { prayerTimes, nextPrayer, loading } = usePrayerTimes();
+  const { prayerTimes, nextPrayer, loading, setLocationByCity } = usePrayerTimes();
   const { settings, updateSettings } = useNotification();
   const { todayLog, togglePrayer, isDayPerfect } = useSystemLog();
+  const { setLocationMode } = useSettings();
 
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   // Update current time every second for the big clock
   useEffect(() => {
@@ -78,7 +82,26 @@ export const PrayerTimesCard = memo(() => {
   };
 
   if (loading) return <div className="h-64 flex items-center justify-center text-[#FFD700] animate-pulse">Loading...</div>;
-  if (!prayerTimes) return <div className="text-center text-white">{t.enableLocation}</div>;
+  if (!prayerTimes) return (
+    <div className="text-center p-8 bg-white/40 backdrop-blur-sm rounded-[2rem] border border-emerald-deep/5 space-y-4">
+        <p className="text-emerald-deep font-tajawal">{t.enableLocation}</p>
+        <button 
+            onClick={() => setIsSelectorOpen(true)}
+            className="px-6 py-2 bg-emerald-deep text-white rounded-full font-tajawal text-sm hover:scale-[1.03] active:scale-[0.97] transition-all"
+        >
+            {language === 'ar' ? 'اختر موقعك يدوياً' : 'Set Location Manually'}
+        </button>
+        <LocationSelector 
+            isOpen={isSelectorOpen} 
+            onClose={() => setIsSelectorOpen(false)} 
+            language={language}
+            onSelect={(city) => {
+                setLocationByCity(city);
+                setIsSelectorOpen(false);
+            }}
+        />
+    </div>
+  );
 
   const prayersList = [
     { key: 'fajr', name: t.fajr, time: prayerTimes.fajr },
@@ -113,7 +136,10 @@ export const PrayerTimesCard = memo(() => {
 
         <div className="relative z-10 p-5 flex flex-col items-center justify-center text-center">
           {/* Location Pill */}
-          <div className="bg-emerald-900/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 mb-2 border border-white/5 cursor-pointer hover:bg-emerald-900/60 transition-colors">
+          <div 
+            onClick={() => setIsSelectorOpen(true)}
+            className="bg-emerald-900/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 mb-2 border border-white/5 cursor-pointer hover:bg-emerald-900/60 transition-colors"
+          >
             <MapPin className="w-3 h-3 text-gold-matte" />
             <span className="text-[10px] font-tajawal tracking-wide text-emerald-100/90">{prayerTimes.city}</span>
           </div>
@@ -236,6 +262,16 @@ export const PrayerTimesCard = memo(() => {
           );
         })}
       </div>
+
+      <LocationSelector 
+        isOpen={isSelectorOpen} 
+        onClose={() => setIsSelectorOpen(false)} 
+        language={language}
+        onSelect={(city) => {
+            setLocationByCity(city);
+            setIsSelectorOpen(false);
+        }}
+      />
     </div>
   );
 });

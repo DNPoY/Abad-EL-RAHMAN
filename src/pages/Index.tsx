@@ -15,6 +15,9 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { HijriDateDisplay } from "@/components/HijriDateDisplay";
 import { DockNavigation } from "@/components/DockNavigation";
 import { AlarmChallenge } from "@/components/AlarmChallenge";
+import { SunnahChecklist } from "@/components/SunnahChecklist";
+import { AuraEffect } from "@/components/AuraEffect";
+import { useSystemLog } from "@/hooks/useSystemLog";
 
 import {
   Dialog,
@@ -61,6 +64,10 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("prayers");
   const [isDuaOpen, setIsDuaOpen] = useState(false);
   const [devModeEnabled, setDevModeEnabled] = useState(false);
+  const { getHarmonyLevel, todayLog } = useSystemLog();
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const harmonyLevel = getHarmonyLevel(dateStr);
   const [tapCount, setTapCount] = useState(0);
   const { vibrateLight } = useVibration();
 
@@ -68,14 +75,14 @@ const Index = () => {
     const now = new Date();
     const hijriDate = getHijriDate(now, language as "ar" | "en");
     
-    // Find next event
-    const month = now.getMonth(); // This is Gregorian, need Hijri month
-    // Simplified: check current month events
-    const dummyDate = new Date();
-    // Native Intl approach to get Hijri month index (0-11)
-    const hijriMonth = parseInt(new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {month: "numeric"}).format(now)) - 1;
-    const events = getHijriEvents(hijriMonth, now.getFullYear()); // simplified year
-    const nextEvent = events.find(e => e.day >= now.getDate()); // very rough estimate
+    // Find next event with more accuracy
+    const hijriFormatter = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {day: "numeric", month: "numeric"});
+    const parts = hijriFormatter.formatToParts(now);
+    const hijriDay = parseInt(parts.find(p => p.type === "day")?.value || "1");
+    const hijriMonth = parseInt(parts.find(p => p.type === "month")?.value || "1") - 1;
+    
+    const events = getHijriEvents(hijriMonth, now.getFullYear());
+    const nextEvent = events.find(e => e.day >= hijriDay);
     
     let feedback = language === "ar" 
       ? `التاريخ اليوم هو ${hijriDate}.` 
@@ -144,7 +151,7 @@ const Index = () => {
   };
 
   // Custom Icons for Bottom Nav - Restoring ALL original tabs
-  const navItems = [
+  const navItems = useMemo(() => [
     { id: "prayers", label: t.prayerTimes, icon: Clock },
     { id: "progress", label: language === "ar" ? "التقدم" : "Progress", icon: TrendingUp },
     { id: "quran", label: language === "ar" ? "القرآن" : "Quran", icon: BookOpen },
@@ -162,70 +169,72 @@ const Index = () => {
     { id: "qada", label: language === "ar" ? "قضاء" : "Qada", icon: ClipboardList },
     { id: "settings", label: t.settings, icon: Settings },
     ...(devModeEnabled ? [{ id: "developer", label: "Dev", icon: Terminal }] : []),
-  ];
+  ], [t, language, devModeEnabled]);
+
+  const contentMap: Record<string, React.ReactNode> = {
+    prayers: (
+      <div className="space-y-6">
+        <PrayerTimesCard />
+      </div>
+    ),
+    progress: (
+      <div className="space-y-6">
+        <SunnahChecklist />
+        <HarmonyLevels />
+        <MilestoneRewards />
+      </div>
+    ),
+    quran: <QuranIndex isEmbedded={true} />,
+    tajweed: <TajweedPage />,
+    mosques: <MasjidFinder />,
+    qibla: (
+      <div className="flex justify-center h-full items-center">
+        <QiblaCompass />
+      </div>
+    ),
+    calendar: <HijriCalendar />,
+    azkar: <AzkarList />,
+    dua: <DuaList />,
+    qada: <QadaCalculator />,
+    asmaUlHusna: <AsmaUlHusna />,
+    zakat: <ZakatCalculator />,
+    tasbih: <TasbihCounter />,
+    khatma: <KhatmaPlanner />,
+    sunnah: <SunnahPrayers />,
+    settings: <SettingsPage />,
+    developer: <DeveloperPanel />,
+  };
 
   const renderContent = () => {
-    switch (activeTab) {
-      case "prayers":
-        return (
-          <div className="space-y-6">
-            <PrayerTimesCard />
-          </div>
-        );
-      case "progress":
-        return (
-          <div className="space-y-6">
-            <HarmonyLevels />
-            <MilestoneRewards />
-          </div>
-        );
-      case "quran":
-        return <QuranIndex isEmbedded={true} />;
-      case "tajweed":
-        return <TajweedPage />;
-      case "mosques":
-        return <MasjidFinder />;
-      case "qibla":
-        return (
-          <div className="flex justify-center h-full items-center">
-            <QiblaCompass />
-          </div>
-        );
-      case "calendar":
-        return <HijriCalendar />;
-      case "azkar":
-        return <AzkarList />;
-      case "dua":
-        return <DuaList />;
-      case "qada":
-        return <QadaCalculator />;
-      case "asmaUlHusna":
-        return <AsmaUlHusna />;
-      case "zakat":
-        return <ZakatCalculator />;
-      case "tasbih":
-        return <TasbihCounter />;
-      case "khatma":
-        return <KhatmaPlanner />;
-      case "sunnah":
-        return <SunnahPrayers />;
-      case "settings":
-        return <SettingsPage />;
-      case "developer":
-        return <DeveloperPanel />;
-      default:
-        return <PrayerTimesCard />;
-    }
+    return contentMap[activeTab] || contentMap.prayers;
   };
 
   return (
     <div className="min-h-screen bg-cream text-foreground font-sans flex flex-col relative overflow-hidden selection:bg-emerald-light selection:text-white">
       {/* Background Breathing Glow - Moved here to fix jitter in long lists */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,rgba(16,185,129,0.1)_0%,transparent_70%)] animate-pulse-breathing" />
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,rgba(16,185,129,0.12)_0%,transparent_70%)] animate-pulse-breathing" />
+
+      {/* Sakina Effect: Floating Light Particles */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute rounded-full bg-emerald-light/10 blur-xl animate-float-slow"
+            style={{
+              width: `${Math.random() * 200 + 100}px`,
+              height: `${Math.random() * 200 + 100}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${i * 2}s`,
+              animationDuration: `${15 + Math.random() * 10}s`
+            }}
+          />
+        ))}
+      </div>
 
       {/* Background Texture Overlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply"
-        style={{ backgroundImage: `url('/textures/cream-paper.png')`, backgroundSize: 'cover' }}>
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-20 mix-blend-multiply"
+        style={{ backgroundImage: `url('/assets/pattern.png')`, backgroundSize: '150px' }}>
       </div>
 
       {/* Offline Banner */}
@@ -269,11 +278,18 @@ const Index = () => {
               onClick={() => setIsDuaOpen(true)}
               className="cursor-pointer transition-transform duration-[369ms] hover:scale-[1.06] active:scale-[0.96] group relative flex justify-center items-center"
             >
-              <div className="absolute inset-0 bg-white/10 blur-3xl rounded-full opacity-50 pointer-events-none" />
               <img
                 src="/assets/logo_caligraphy.png"
                 alt="Ibad Al-Rahman"
-                className="h-28 md:h-36 w-auto object-contain drop-shadow-lg relative z-10"
+                className="h-28 md:h-36 w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.4)] relative z-10 brightness-[1.05]"
+              />
+              <AuraEffect 
+                harmonyLevel={harmonyLevel} 
+                className="scale-110 opacity-70"
+                activeTriggers={{
+                  morningAzkar: todayLog.azkar.morning,
+                  eveningAzkar: todayLog.azkar.evening
+                }}
               />
             </div>
           </div>

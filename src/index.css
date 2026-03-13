@@ -245,7 +245,7 @@
   }
 
   .animate-fade-in-up {
-    animation: fadeInUp 0.618s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInUp 0.639s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeInDown {
@@ -261,7 +261,7 @@
   }
 
   .animate-fade-in-down {
-    animation: fadeInDown 0.618s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInDown 0.639s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   @keyframes fadeIn {
@@ -307,7 +307,7 @@
   }
 
   .animate-pulse-breathing {
-    animation: pulseBreathing 6.93s ease-in-out infinite;
+    animation: pulseBreathing 6.66s ease-in-out infinite;
     will-change: transform, opacity;
   }
 
@@ -327,6 +327,16 @@
   .animate-harmonic-strobe {
     animation: harmonicStrobe 4.32s ease-in-out infinite;
     will-change: filter;
+  }
+
+  /* Thermal Throttling: Pause non-essential animations to reduce GPU load & heat */
+  .thermal-throttle .animate-pulse-breathing,
+  .thermal-throttle .animate-harmonic-strobe,
+  .thermal-throttle .animate-pulse-soft,
+  .thermal-throttle .animate-pulse-glow-green,
+  .thermal-throttle .animate-float-slow {
+    animation-play-state: paused !important;
+    filter: none !important;
   }
 
   /* Pause animations when page is not visible (saves GPU) */
@@ -376,18 +386,32 @@
   font-family: 'original-hafs', serif;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+  @keyframes float-slow {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+  }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
+  .animate-float-slow {
+    animation: float-slow 20s ease-in-out infinite;
+  }
+
+  .glass-premium {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
 
 /* Custom Qibla Glow Animation */
 @keyframes pulseGlowGreen {

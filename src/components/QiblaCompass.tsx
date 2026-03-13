@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Compass, Navigation, Camera } from "lucide-react";
 import { toast } from "sonner";
-import { QiblaAR } from "./QiblaAR";
+import { Suspense, lazy } from 'react';
+// import { QiblaAR } from "./QiblaAR";
+
+const QiblaAR = lazy(() => import('./QiblaAR').then(module => ({ default: module.QiblaAR })));
+
 
 export const QiblaCompass = memo(() => {
   const { t, language } = useLanguage();
@@ -87,13 +91,33 @@ export const QiblaCompass = memo(() => {
   useEffect(() => {
     if (!hasPermission) return;
 
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      const alpha = event.alpha || 0;
-      setDeviceHeading(360 - alpha);
+    const handleOrientation = (event: any) => {
+      let heading = 0;
+      
+      // iOS
+      if (event.webkitCompassHeading !== undefined) {
+        heading = event.webkitCompassHeading;
+      } 
+      // Android (Absolute)
+      else if (event.absolute === true && event.alpha !== null) {
+        heading = (360 - event.alpha) % 360;
+      }
+      // Fallback
+      else if (event.alpha !== null) {
+        heading = (360 - event.alpha) % 360;
+      }
+
+      setDeviceHeading(heading);
     };
 
-    window.addEventListener("deviceorientation", handleOrientation);
-    return () => window.removeEventListener("deviceorientation", handleOrientation);
+    // Use deviceorientationabsolute for better accuracy on Android
+    if ("ondeviceorientationabsolute" in (window as any)) {
+      (window as any).addEventListener("deviceorientationabsolute", handleOrientation);
+      return () => (window as any).removeEventListener("deviceorientationabsolute", handleOrientation);
+    } else {
+      window.addEventListener("deviceorientation", handleOrientation as any);
+      return () => window.removeEventListener("deviceorientation", handleOrientation as any);
+    }
   }, [hasPermission]);
 
   const relativeQibla = (qiblaDirection - deviceHeading + 360) % 360;
@@ -215,10 +239,19 @@ export const QiblaCompass = memo(() => {
       </div>
       
       {showAR && (
-        <QiblaAR 
-            qiblaDirection={qiblaDirection} 
-            onClose={() => setShowAR(false)} 
-        />
+        <Suspense fallback={
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-gold-matte border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-white font-amiri text-lg">{language === 'ar' ? 'جاري تحميل الواقع المعزز...' : 'Loading AR View...'}</p>
+            </div>
+          </div>
+        }>
+          <QiblaAR 
+              qiblaDirection={qiblaDirection} 
+              onClose={() => setShowAR(false)} 
+          />
+        </Suspense>
       )}
     </Card>
   );

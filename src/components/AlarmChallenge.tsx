@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { haptics } from "@/lib/haptics";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,14 @@ export const AlarmChallenge = () => {
             } else if (challengeType === "math") {
                 generateProblem();
             }
+
+            // Recurring 9-second harmonic pulse (3-6-9 Protocol)
+            haptics.alert(); // Initial pulse
+            const interval = setInterval(() => {
+                haptics.alert();
+            }, 9000);
+
+            return () => clearInterval(interval);
         }
     }, [isAlarmRinging, challengeType]);
 

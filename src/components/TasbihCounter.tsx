@@ -19,7 +19,7 @@ import {
 import { GoldenRatioSpiral } from "./GoldenRatioSpiral";
 import { useWidgetUpdater } from "@/hooks/useWidgetUpdater";
 import { usePrayerTimes } from "@/contexts/PrayerTimesContext";
-import { triggerPatternHaptic } from "@/lib/haptics";
+import { haptics } from "@/lib/haptics";
 
 // Memoized counter button component for performance
 const CounterButton = memo(({
@@ -165,22 +165,13 @@ export const TasbihCounter = memo(() => {
         increment();
         announceTasbihCount(nextCount, target, language);
 
-        // Physicalized Bead Haptic: Subtle "double-click" feel
-        // This mimics a bead passing through fingers (resistance then release)
-        triggerPatternHaptic([10, 30, 10]);
-
-        // Numerical Harmony Haptics
-        if (nextCount === 33) {
-            triggerPatternHaptic(HAPTIC_PATTERNS.RECOGNITION_3);
-        } else if (nextCount === 66) {
-            triggerPatternHaptic(HAPTIC_PATTERNS.ALIGNMENT_6);
-        } else if (nextCount === 99 || (target > 0 && nextCount === target)) {
-            triggerPatternHaptic(HAPTIC_PATTERNS.COMPLETION_9);
-        }
-        
-        // Fibonacci Pulse for major milestones (every 100 if target 0, or on target reached)
-        if (target === 0 && nextCount % 100 === 0) {
-           triggerPatternHaptic(HAPTIC_PATTERNS.FIBONACCI);
+        // Harmonic 3-6-9 System
+        if (target > 0 && nextCount === target) {
+            haptics.goal();
+        } else if (nextCount % 9 === 0) {
+            haptics.alert(); // Stronger emphasis on 9s
+        } else {
+            haptics.tap(); // Delicate 3ms tap for every bead
         }
     };
 

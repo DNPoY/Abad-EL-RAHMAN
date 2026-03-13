@@ -71,7 +71,10 @@ const App = () => {
       const resumeListener = await CapApp.addListener('appStateChange', async (state: { isActive: boolean }) => {
         if (state.isActive) {
           console.log("App resumed, resyncing alarms...");
-          window.dispatchEvent(new Event('app-resumed'));
+          // Throttle re-sync to avoid immediate heavy load
+          setTimeout(() => {
+            window.dispatchEvent(new Event('app-resumed'));
+          }, 333); 
         }
       });
       return resumeListener;
@@ -92,7 +95,12 @@ const App = () => {
         <ForceUpdateDialog />
         <BrowserRouter>
           <BackButtonHandler />
-          <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-[#f8f9fa] dark:bg-[#1a1c1e] text-primary">Loading...</div>}>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-cream text-emerald-deep font-tajawal">
+            <div className="flex flex-col items-center gap-6">
+              <div className="w-12 h-12 border-4 border-emerald-deep/20 border-t-emerald-deep rounded-full animate-spin" />
+              <div className="animate-pulse-soft text-lg font-bold">جاري التحميل...</div>
+            </div>
+          </div>}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/quran" element={<QuranIndex />} />

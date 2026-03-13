@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import WidgetBridge from "@/lib/widget-bridge";
+// import WidgetBridge from "@/lib/widget-bridge";
 
 export interface SettingsState {
     calculationMethod: number;
@@ -162,19 +162,25 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const setAzanVolume = (volume: number) => {
         setAzanVolumeState(volume);
         localStorage.setItem("azanVolume", volume.toString());
-        WidgetBridge.setAzanVolume({ volume }).catch(err => console.error("Failed to set native volume", err));
+        import("@/lib/widget-bridge").then(({ default: WidgetBridge }) => {
+            WidgetBridge.setAzanVolume({ volume }).catch(err => console.error("Failed to set native volume", err));
+        });
     };
 
     const setSmartDnd = (enabled: boolean) => {
         setSmartDndState(enabled);
         localStorage.setItem("smartDnd", enabled.toString());
-        WidgetBridge.setSmartDnd({ enabled }).catch(err => console.error("Failed to set smartDnd", err));
+        import("@/lib/widget-bridge").then(({ default: WidgetBridge }) => {
+            WidgetBridge.setSmartDnd({ enabled }).catch(err => console.error("Failed to set smartDnd", err));
+        });
     };
 
     const setAzanFadeIn = (enabled: boolean) => {
         setAzanFadeInState(enabled);
         localStorage.setItem("azanFadeIn", enabled.toString());
-        WidgetBridge.setAzanFadeIn({ enabled }).catch(err => console.error("Failed to set azanFadeIn", err));
+        import("@/lib/widget-bridge").then(({ default: WidgetBridge }) => {
+            WidgetBridge.setAzanFadeIn({ enabled }).catch(err => console.error("Failed to set azanFadeIn", err));
+        });
     };
 
     const setTheme = (t: "default" | "makkah-midnight" | "madinah-dawn" | "andalusian-gold") => {

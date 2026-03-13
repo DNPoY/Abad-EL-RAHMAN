@@ -1,6 +1,6 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
-import WidgetBridge from '@/lib/widget-bridge';
+// import WidgetBridge from '@/lib/widget-bridge';
 import { Coordinates, CalculationMethod, PrayerTimes, Madhab } from 'adhan';
 import { toast } from "sonner";
 import { RemoteConfigService } from "@/lib/remote-config";
@@ -79,6 +79,7 @@ export const PrayerScheduleService = {
                 console.log("[PrayerScheduleService] Notifications disabled. Cancelling all.");
                 const pNames = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
                 for (let i = 0; i < 7; i++) {
+                    const { default: WidgetBridge } = await import("@/lib/widget-bridge");
                     for (const p of pNames) {
                         await WidgetBridge.cancelAdhan({ prayerName: `${p}_${i}` });
                     }
@@ -154,6 +155,7 @@ export const PrayerScheduleService = {
                 for (const prayer of times) {
                     // Skip if explicitly disabled
                     if (!options.notifSettings.enabledPrayers[prayer.name as keyof typeof options.notifSettings.enabledPrayers]) {
+                        const { default: WidgetBridge } = await import("@/lib/widget-bridge");
                         await WidgetBridge.cancelAdhan({ prayerName: `${prayer.name}_${i}` });
                         continue;
                     }
@@ -164,6 +166,7 @@ export const PrayerScheduleService = {
                         const uniqueKey = `${prayer.name}_${i}`;
 
                         if (!isNaN(prayer.date.getTime())) {
+                            const { default: WidgetBridge } = await import("@/lib/widget-bridge");
                             await WidgetBridge.scheduleAdhan({
                                 prayerName: uniqueKey,
                                 timestamp: prayer.date.getTime(),

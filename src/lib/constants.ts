@@ -24,6 +24,10 @@ export const HAPTIC_PATTERNS = {
     RECOGNITION_3: [30, 100, 30, 100, 30],           // 3 short taps
     ALIGNMENT_6: [60, 150, 60, 150, 60, 150, 60, 150, 60, 150, 60], // 6 medium taps
     COMPLETION_9: [100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100, 200, 100], // 9 long deep pulses
+    // Individual pulses for 3-6-9 intervals
+    PULSE_3: [30],
+    PULSE_6: [60],
+    PULSE_9: [90],
 } as const;
 
 /**

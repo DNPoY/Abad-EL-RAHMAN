@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useNotification } from "@/contexts/NotificationContext";
-import { Terminal, Trash2, Plus, X, Edit2, Check, Headphones } from "lucide-react";
+import { Terminal, Trash2, Plus, X, Edit2, Check, Headphones, Wind, Zap } from "lucide-react";
 import { speak8D } from "@/lib/audio-8d";
 import { toast } from "sonner";
 import { specialDuas as originalSpecialDuas, simpleDuas as originalSimpleDuas, SpecialDua } from "@/lib/developer-data";
@@ -182,6 +182,37 @@ export const DeveloperPanel = () => {
         if (confirm("Are you sure you want to clear ALL local storage? This will reset the app completely.")) {
             localStorage.clear();
             window.location.reload();
+        }
+    };
+
+    const handleDeepPurge = async () => {
+        try {
+            toast.loading("جاري التطهير العميق...", { id: "deep-purge" });
+
+            // 1. Clear Caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+
+            // 2. Clear Session Storage
+            sessionStorage.clear();
+
+            // 3. Reset/Pause Animations (Thermal Optimization)
+            document.documentElement.classList.add('thermal-throttle');
+            // Show feedback that graphics are optimized
+            toast.info("تم تقليل استهلاك الرسوميات (Thermal Mode Active)", { id: "thermal-feedback" });
+
+            // 4. Force collect garbage (best effort via re-allocation hint if possible, but mostly psychological/UI feedback here)
+            // We can also trigger a minor state reset if needed.
+
+            setTimeout(() => {
+                toast.success("تم التطهير بنجاح! تم مسح الكاش وتحسين الأداء.", { id: "deep-purge" });
+            }, 1500);
+
+        } catch (e) {
+            console.error("Deep Purge Error:", e);
+            toast.error("فشل التطهير العميق", { id: "deep-purge" });
         }
     };
 
@@ -365,6 +396,30 @@ seasonal_config.home_banner_text_ar: ${seasonal.home_banner_text_ar || 'None'}`;
                         }}
                     >
                         📋 Show Current Remote Config Values
+                    </Button>
+
+                    <div className="border-t border-white/10 my-2"></div>
+                    <h4 className="text-sm font-bold text-white/80">🚀 System Optimization</h4>
+
+                    <Button
+                        onClick={handleDeepPurge}
+                        className="w-full justify-start text-white bg-indigo-600/50 hover:bg-indigo-600/70"
+                    >
+                        <Wind className="w-4 h-4 mr-2" />
+                        Deep Purge & Cleanse (تطهير عميق)
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        className="w-full justify-start text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                        onClick={() => {
+                            document.documentElement.classList.toggle('thermal-throttle');
+                            const isActive = document.documentElement.classList.contains('thermal-throttle');
+                            toast.info(isActive ? "Thermal Throttle Active (GPU Saved)" : "Thermal Throttle Disabled");
+                        }}
+                    >
+                        <Zap className="w-4 h-4 mr-2" />
+                        Toggle Thermal Mode (Manual)
                     </Button>
 
                     <div className="border-t border-white/10 my-2"></div>

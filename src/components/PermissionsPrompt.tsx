@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Battery, Zap, CheckCircle2, Bell } from "lucide-react";
-import WidgetBridge from "@/lib/widget-bridge";
+// import WidgetBridge from "@/lib/widget-bridge";
 import { Capacitor } from "@capacitor/core";
 
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -32,7 +32,8 @@ export const PermissionsPrompt = () => {
         }
     }, []);
 
-    const handleOpenBattery = () => {
+    const handleOpenBattery = async () => {
+        const { default: WidgetBridge } = await import("@/lib/widget-bridge");
         WidgetBridge.openBatterySettings().catch(console.error);
     };
 

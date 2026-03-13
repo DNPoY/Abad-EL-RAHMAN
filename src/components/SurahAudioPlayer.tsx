@@ -175,7 +175,7 @@ export const SurahAudioPlayer = ({ surahNumber, totalAyahs, onAyahChange, jumpTo
         const paddedSurah = surah.toString().padStart(3, "0");
         const paddedAyah = ayah.toString().padStart(3, "0");
 
-        let remoteUrl = `${reciter.url}${paddedSurah}${paddedAyah}.mp3`;
+        const remoteUrl = `${reciter.url}${paddedSurah}${paddedAyah}.mp3`;
         const fileName = `${paddedAyah}.mp3`;
 
         // OFFLINE CHECK: Only check filesystem if we know the Surah is downloaded

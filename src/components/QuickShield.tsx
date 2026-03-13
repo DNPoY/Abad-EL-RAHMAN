@@ -1,14 +1,13 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ShieldAlert, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useVibration } from '@/hooks/useVibration';
+import { haptics } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export const QuickShield: React.FC = () => {
   const { t, language } = useLanguage();
-  const { vibrate } = useVibration();
   const [isActive, setIsActive] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
 
@@ -18,10 +17,8 @@ export const QuickShield: React.FC = () => {
     setIsScanning(true);
     setIsActive(true);
 
-    // 1. Haptic Pulse: 3 short (100ms) followed by 1 long (400ms)
-    // pattern: [pulse, pause, pulse, pause, pulse, pause, long_pulse]
-    const hapticPattern = [100, 50, 100, 50, 100, 100, 400];
-    vibrate(hapticPattern);
+    // 1. Haptic Pulse: Harmonic Protection Pattern
+    haptics.protect();
 
     // 2. Text-to-Speech
     const speakDua = () => {
@@ -50,7 +47,7 @@ export const QuickShield: React.FC = () => {
       setIsScanning(false);
       setTimeout(() => setIsActive(false), 1000);
     }, 4000);
-  }, [isScanning, t, language, vibrate]);
+  }, [isScanning, t, language]);
 
   return (
     <>
