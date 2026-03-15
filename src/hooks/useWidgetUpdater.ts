@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 // import WidgetBridge from "@/lib/widget-bridge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 
 interface PrayerTimesData {
     fajr: string;
@@ -92,6 +93,8 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null, dhikrData?
                     return `${h12}:${m.toString().padStart(2, '0')}`; // Minimalist: Just time. Use bold/color for context.
                 };
 
+                const t = translations[language];
+
                 const { default: WidgetBridge } = await import("@/lib/widget-bridge");
                 await WidgetBridge.updateWidgetData({
                     fajr: formatTime(prayerTimes.fajr),
@@ -105,7 +108,17 @@ export const useWidgetUpdater = (prayerTimes: PrayerTimesData | null, dhikrData?
                     locationName: locationName,
                     dhikrProgress: dhikrData?.count,
                     dhikrTarget: dhikrData?.target,
-                    currentDhikr: dhikrData?.title
+                    currentDhikr: dhikrData?.title,
+                    // New localized labels
+                    language: language,
+                    labelFajr: t.fajr,
+                    labelDhuhr: t.dhuhr,
+                    labelAsr: t.asr,
+                    labelMaghrib: t.maghrib,
+                    labelIsha: t.isha,
+                    labelNext: t.nextPrayer,
+                    labelProtection: t.appName, // Using appName as a header for protection section
+                    labelDhikr: t.tasbih
                 });
                 console.log("Widget updated:", { prayerName, time: formattedTime, date: widgetDisplayDate, locationName });
 

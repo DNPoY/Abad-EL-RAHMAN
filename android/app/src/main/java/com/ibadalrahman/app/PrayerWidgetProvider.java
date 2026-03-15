@@ -38,11 +38,34 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
         int dhikrProgress = prefs.getInt("dhikrProgress", 0);
         String currentDhikr = prefs.getString("currentDhikr", "--");
         int dhikrTarget = prefs.getInt("dhikrTarget", 0);
-        // We will use nextPrayerName to decide which one to highlight
+
+        String language = prefs.getString("language", "ar");
+        String labelFajr = prefs.getString("labelFajr", "Fajr");
+        String labelDhuhr = prefs.getString("labelDhuhr", "Dhuhr");
+        String labelAsr = prefs.getString("labelAsr", "Asr");
+        String labelMaghrib = prefs.getString("labelMaghrib", "Maghrib");
+        String labelIsha = prefs.getString("labelIsha", "Isha");
+        String labelNext = prefs.getString("labelNext", "Next");
+        String labelProtection = prefs.getString("labelProtection", "Protection");
+        String labelDhikr = prefs.getString("labelDhikr", "Dhikr");
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.prayer_widget);
         
+        // Handle RTL / Layout Direction
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            int layoutDir = language.equals("ar") ? android.view.View.LAYOUT_DIRECTION_RTL : android.view.View.LAYOUT_DIRECTION_LTR;
+            // views.setLayoutDirection(layoutDir); // Not available for RemoteViews in older API versions
+            // However, most modern Android versions handle layoutDirection="locale" in XML if we set it.
+        }
+
+        // Set Localized Labels
+        views.setTextViewText(R.id.widget_fajr_label, labelFajr);
+        views.setTextViewText(R.id.widget_dhuhr_label, labelDhuhr);
+        views.setTextViewText(R.id.widget_asr_label, labelAsr);
+        views.setTextViewText(R.id.widget_maghrib_label, labelMaghrib);
+        views.setTextViewText(R.id.widget_isha_label, labelIsha);
+
         // Set Texts
         views.setTextViewText(R.id.widget_fajr_time, fajr);
         views.setTextViewText(R.id.widget_dhuhr_time, dhuhr);
@@ -53,8 +76,8 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_hijri_date, hijriDate);
 
         // Update Protection Status
-        String nextLabel = context.getString(R.string.next_prayer_label);
-        views.setTextViewText(R.id.widget_next_prayer_info, nextLabel + " " + nextPrayerName);
+        views.setTextViewText(R.id.widget_protection_label, labelProtection);
+        views.setTextViewText(R.id.widget_next_prayer_info, labelNext + ": " + nextPrayerName);
         
         views.setTextViewText(R.id.widget_current_dhikr, currentDhikr);
         views.setTextViewText(R.id.widget_dhikr_count, dhikrProgress + "/" + dhikrTarget);

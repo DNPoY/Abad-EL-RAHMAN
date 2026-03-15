@@ -212,21 +212,26 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-cream text-foreground font-sans flex flex-col relative overflow-hidden selection:bg-emerald-light selection:text-white">
       {/* Background Breathing Glow - Moved here to fix jitter in long lists */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,rgba(16,185,129,0.12)_0%,transparent_70%)] animate-pulse-breathing" />
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle,rgba(16,185,129,0.12)_0%,transparent_70%)] animate-pulse-breathing" 
+        style={{ transform: 'translate3d(0,0,0)', willChange: 'transform, opacity' }}
+      />
 
       {/* Sakina Effect: Floating Light Particles */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" style={{ transform: 'translate3d(0,0,0)' }}>
         {[...Array(6)].map((_, i) => (
           <div 
             key={i}
             className="absolute rounded-full bg-emerald-light/10 blur-xl animate-float-slow"
             style={{
-              width: `${Math.random() * 200 + 100}px`,
-              height: `${Math.random() * 200 + 100}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${i * 2}s`,
-              animationDuration: `${15 + Math.random() * 10}s`
+              width: `${[144, 233][i % 2]}px`, // Fibonacci values
+              height: `${[144, 233][i % 2]}px`,
+              top: `${(i * 33) % 100}%`, // Multiple of 3
+              left: `${(i * 21) % 100}%`, // Fibonacci
+              animationDelay: `${i * 3}s`, // Multiple of 3
+              animationDuration: `${18 + (i * 3)}s`, // Multiple of 3
+              transform: 'translate3d(0,0,0)',
+              willChange: 'transform'
             }}
           />
         ))}

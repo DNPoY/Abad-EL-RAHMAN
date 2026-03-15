@@ -28,6 +28,16 @@ public class WidgetPlugin extends Plugin {
         Integer dhikrProgress = call.getInt("dhikrProgress");
         String currentDhikr = call.getString("currentDhikr");
         Integer dhikrTarget = call.getInt("dhikrTarget");
+        
+        String language = call.getString("language");
+        String labelFajr = call.getString("labelFajr");
+        String labelDhuhr = call.getString("labelDhuhr");
+        String labelAsr = call.getString("labelAsr");
+        String labelMaghrib = call.getString("labelMaghrib");
+        String labelIsha = call.getString("labelIsha");
+        String labelNext = call.getString("labelNext");
+        String labelProtection = call.getString("labelProtection");
+        String labelDhikr = call.getString("labelDhikr");
 
         Context context = getContext();
         SharedPreferences prefs = context.getSharedPreferences("PrayerWidgetPrefs", Context.MODE_PRIVATE);
@@ -44,6 +54,16 @@ public class WidgetPlugin extends Plugin {
         if (dhikrProgress != null) editor.putInt("dhikrProgress", dhikrProgress);
         if (currentDhikr != null) editor.putString("currentDhikr", currentDhikr);
         if (dhikrTarget != null) editor.putInt("dhikrTarget", dhikrTarget);
+        
+        if (language != null) editor.putString("language", language);
+        if (labelFajr != null) editor.putString("labelFajr", labelFajr);
+        if (labelDhuhr != null) editor.putString("labelDhuhr", labelDhuhr);
+        if (labelAsr != null) editor.putString("labelAsr", labelAsr);
+        if (labelMaghrib != null) editor.putString("labelMaghrib", labelMaghrib);
+        if (labelIsha != null) editor.putString("labelIsha", labelIsha);
+        if (labelNext != null) editor.putString("labelNext", labelNext);
+        if (labelProtection != null) editor.putString("labelProtection", labelProtection);
+        if (labelDhikr != null) editor.putString("labelDhikr", labelDhikr);
         
         editor.apply();
 

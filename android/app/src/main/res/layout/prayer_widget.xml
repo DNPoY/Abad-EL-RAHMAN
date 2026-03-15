@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_premium"
-    android:padding="16dp">
+    android:padding="20dp"
+    android:layoutDirection="locale">
 
     <!-- Header Section: App Name + Hijri Date -->
     <LinearLayout
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentTop="true"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="16dp"
         android:gravity="center_vertical">
 
         <!-- App Logo/Icon Area -->
@@ -27,18 +28,19 @@
                 android:layout_height="wrap_content"
                 android:text="@string/widget_title"
                 android:textColor="#C5A059"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
+                android:letterSpacing="0.05"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
-        <!-- Hijri Date Badge -->
+        <!-- Hijri Date Badge (Pill Style) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/widget_prayer_card"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
+            android:background="@drawable/widget_bg_glass"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="5dp"
             android:gravity="center">
 
             <TextView
@@ -46,10 +48,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="14 Sep 2024"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-condensed" />
+                android:textColor="#E0E0E0"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-light" />
         </LinearLayout>
     </LinearLayout>
 
@@ -67,14 +68,12 @@
         <LinearLayout
             android:id="@+id/layout_fajr"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_prayer_card"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="4dp"
-            android:layout_marginEnd="4dp">
+            android:layout_marginEnd="6dp">
 
             <TextView
                 android:id="@+id/widget_fajr_label"
@@ -82,8 +81,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/fajr"
                 android:textColor="#C5A059"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:textSize="10sp"
+                android:alpha="0.8"
                 android:fontFamily="sans-serif-condensed" />
 
             <TextView
@@ -92,9 +91,9 @@
                 android:layout_height="wrap_content"
                 android:text="04:30"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
@@ -102,14 +101,12 @@
         <LinearLayout
             android:id="@+id/layout_dhuhr"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_prayer_card"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="4dp"
-            android:layout_marginEnd="4dp">
+            android:layout_marginEnd="6dp">
 
             <TextView
                 android:id="@+id/widget_dhuhr_label"
@@ -117,8 +114,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dhuhr"
                 android:textColor="#C5A059"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:textSize="10sp"
+                android:alpha="0.8"
                 android:fontFamily="sans-serif-condensed" />
 
             <TextView
@@ -127,9 +124,9 @@
                 android:layout_height="wrap_content"
                 android:text="12:30"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
@@ -137,14 +134,12 @@
         <LinearLayout
             android:id="@+id/layout_asr"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_prayer_card"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="4dp"
-            android:layout_marginEnd="4dp">
+            android:layout_marginEnd="6dp">
 
             <TextView
                 android:id="@+id/widget_asr_label"
@@ -152,8 +147,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/asr"
                 android:textColor="#C5A059"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:textSize="10sp"
+                android:alpha="0.8"
                 android:fontFamily="sans-serif-condensed" />
 
             <TextView
@@ -162,9 +157,9 @@
                 android:layout_height="wrap_content"
                 android:text="03:45"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
@@ -172,14 +167,12 @@
         <LinearLayout
             android:id="@+id/layout_maghrib"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/widget_prayer_card"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="4dp"
-            android:layout_marginEnd="4dp">
+            android:layout_marginEnd="6dp">
 
             <TextView
                 android:id="@+id/widget_maghrib_label"
@@ -187,8 +180,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/maghrib"
                 android:textColor="#C5A059"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:textSize="10sp"
+                android:alpha="0.8"
                 android:fontFamily="sans-serif-condensed" />
 
             <TextView
@@ -197,9 +190,9 @@
                 android:layout_height="wrap_content"
                 android:text="06:30"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
@@ -207,13 +200,11 @@
         <LinearLayout
             android:id="@+id/layout_isha"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="@drawable/widget_prayer_card"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="4dp">
+            android:background="@drawable/widget_prayer_card">
 
             <TextView
                 android:id="@+id/widget_isha_label"
@@ -221,8 +212,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/isha"
                 android:textColor="#C5A059"
-                android:textSize="11sp"
-                android:textStyle="bold"
+                android:textSize="10sp"
+                android:alpha="0.8"
                 android:fontFamily="sans-serif-condensed" />
 
             <TextView
@@ -231,9 +222,9 @@
                 android:layout_height="wrap_content"
                 android:text="08:00"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
@@ -248,22 +239,24 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/widget_bg_glass"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="14dp">
 
         <TextView
+            android:id="@+id/widget_protection_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/protection_status"
             android:textColor="#C5A059"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:alpha="0.9" />
+            android:alpha="0.9"
+            android:fontFamily="sans-serif-medium" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical">
             
             <TextView
@@ -274,7 +267,7 @@
                 android:text="Next: Maghrib"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
-                android:textStyle="bold" />
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/widget_dhikr_count"
@@ -290,22 +283,22 @@
             android:id="@+id/widget_dhikr_progress"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="8dp"
             android:progress="33"
             android:max="100"
             android:progressTint="#C5A059"
-            android:progressBackgroundTint="#40ffffff" />
+            android:progressBackgroundTint="#33ffffff" />
             
         <TextView
             android:id="@+id/widget_current_dhikr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SubhanAllah"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:layout_marginTop="4dp"
-            android:alpha="0.7" />
+            android:textColor="#BDBDBD"
+            android:textSize="10sp"
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif-light" />
     </LinearLayout>
 
 </RelativeLayout>

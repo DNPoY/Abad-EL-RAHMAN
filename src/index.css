@@ -198,10 +198,11 @@
   /* Utility Classes */
   .glass-panel {
     background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    will-change: backdrop-filter;
+    will-change: backdrop-filter, transform;
+    transform: translate3d(0,0,0);
   }
 
   /* Android: higher opacity, reduced blur for better performance */
@@ -309,6 +310,7 @@
   .animate-pulse-breathing {
     animation: pulseBreathing 6.66s ease-in-out infinite;
     will-change: transform, opacity;
+    transform: translate3d(0,0,0);
   }
 
   /* Harmonic Strobe Logic: Subtle flickering/glow */
@@ -394,6 +396,8 @@
 
   .animate-float-slow {
     animation: float-slow 20s ease-in-out infinite;
+    will-change: transform;
+    transform: translate3d(0,0,0);
   }
 
   .glass-premium {

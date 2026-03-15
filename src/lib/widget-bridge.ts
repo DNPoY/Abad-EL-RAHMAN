@@ -14,6 +14,15 @@ export interface WidgetBridgePlugin {
         dhikrProgress?: number;
         currentDhikr?: string;
         dhikrTarget?: number;
+        language?: string;
+        labelFajr?: string;
+        labelDhuhr?: string;
+        labelAsr?: string;
+        labelMaghrib?: string;
+        labelIsha?: string;
+        labelNext?: string;
+        labelProtection?: string;
+        labelDhikr?: string;
     }): Promise<void>;
     openBatterySettings(): Promise<void>;
     scheduleAdhan(options: {

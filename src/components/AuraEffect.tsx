@@ -42,10 +42,10 @@ export const AuraEffect = ({ harmonyLevel, activeTriggers, className }: AuraEffe
   
   const scale = 1 + (safeHarmonyLevel / 100) * 0.5;
   const opacity = 0.3 + (safeHarmonyLevel / 100) * 0.4;
-  const blur = 20 + (safeHarmonyLevel / 100) * 40;
+  const blurSize = 21 + (safeHarmonyLevel / 100) * 34; // Fibonacci: 21, 34, 55
 
   return (
-    <div className={cn("absolute inset-0 flex items-center justify-center pointer-events-none z-0", className)}>
+    <div className={cn("absolute inset-0 flex items-center justify-center pointer-events-none z-0", className)} style={{ transform: 'translate3d(0,0,0)' }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={auraColors.join("-")}
@@ -53,7 +53,6 @@ export const AuraEffect = ({ harmonyLevel, activeTriggers, className }: AuraEffe
           animate={{ 
             opacity: opacity, 
             scale: [scale * 0.95, scale * 1.05, scale * 0.95],
-            boxShadow: `0 0 ${blur}px ${blur/2}px ${auraColors[0]}`
           }}
           transition={{
             opacity: { duration: 1.5 },
@@ -63,11 +62,11 @@ export const AuraEffect = ({ harmonyLevel, activeTriggers, className }: AuraEffe
               ease: "easeInOut"
             }
           }}
-          className="rounded-full blur-3xl w-2/3 h-2/3 absolute"
+          className="rounded-full blur-[34px] w-2/3 h-2/3 absolute"
           style={{
-            background: auraColors.length > 1 
-              ? `radial-gradient(circle, ${auraColors.join(", ")})`
-              : auraColors[0]
+            background: `radial-gradient(circle, ${auraColors[0]} 0%, transparent 70%)`,
+            transform: 'translate3d(0,0,0)',
+            willChange: 'transform, opacity'
           }}
         />
       </AnimatePresence>
@@ -83,7 +82,12 @@ export const AuraEffect = ({ harmonyLevel, activeTriggers, className }: AuraEffe
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="rounded-full blur-3xl w-full h-full absolute bg-emerald-light/10"
+        className="rounded-full blur-[55px] w-full h-full absolute"
+        style={{
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)',
+            transform: 'translate3d(0,0,0)',
+            willChange: 'transform, opacity'
+        }}
       />
     </div>
   );
