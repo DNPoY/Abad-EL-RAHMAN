@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { triggerHaptic } from "@/lib/haptics";
 import confetti from "canvas-confetti";
 import { useNavigate } from "react-router-dom";
-import { quranPageMapping } from "@/lib/quran-pages";
+import { quranPageMapping365 } from "@/lib/quran-pages-365";
 
 interface KhatmaState {
     isActive: boolean;
@@ -22,7 +22,7 @@ interface KhatmaState {
     dailyTargetPages: number;
 }
 
-const TOTAL_QURAN_PAGES = 604;
+const TOTAL_QURAN_PAGES = 365;
 
 export const KhatmaPlanner = () => {
     const { t, language } = useLanguage();
@@ -127,7 +127,7 @@ export const KhatmaPlanner = () => {
     
     const navigateToQuran = () => {
         const nextP = Math.min(khatma.currentPage + 1, TOTAL_QURAN_PAGES);
-        const mapping = quranPageMapping[nextP];
+        const mapping = quranPageMapping365[nextP];
         if (mapping) {
             triggerHaptic();
             navigate(`/quran/${mapping.s}?ayah=${mapping.a}`);
