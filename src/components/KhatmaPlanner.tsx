@@ -6,10 +6,12 @@ import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, BookOpen, Clock, Target, CheckCircle2, RotateCcw } from "lucide-react";
+import { Calendar, BookOpen, Clock, Target, CheckCircle2, RotateCcw, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { triggerHaptic } from "@/lib/haptics";
 import confetti from "canvas-confetti";
+import { useNavigate } from "react-router-dom";
+import { quranPageMapping } from "@/lib/quran-pages";
 
 interface KhatmaState {
     isActive: boolean;
@@ -24,6 +26,7 @@ const TOTAL_QURAN_PAGES = 604;
 
 export const KhatmaPlanner = () => {
     const { t, language } = useLanguage();
+    const navigate = useNavigate();
     const [khatma, setKhatma] = useState<KhatmaState>({
         isActive: false,
         startDate: "",
@@ -120,6 +123,17 @@ export const KhatmaPlanner = () => {
         const diffTime = targetDate.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays > 0 ? diffDays : 0;
+    };
+    
+    const navigateToQuran = () => {
+        const nextP = Math.min(khatma.currentPage + 1, TOTAL_QURAN_PAGES);
+        const mapping = quranPageMapping[nextP];
+        if (mapping) {
+            triggerHaptic();
+            navigate(`/quran/${mapping.s}?ayah=${mapping.a}`);
+        } else {
+            toast.error(language === "ar" ? "تعذر العثور على الصفحة" : "Could not find page mapping");
+        }
     };
 
     if (!khatma.isActive) {
@@ -225,10 +239,16 @@ export const KhatmaPlanner = () => {
 
                 {/* Progress Circle & Stats */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-emerald-deep to-emerald-800 rounded-2xl p-4 text-white hover:shadow-lg transition-transform hover:scale-[1.02]">
-                        <div className="flex items-center gap-2 mb-2 opacity-80">
-                            <BookOpen className="w-4 h-4" />
-                            <span className="text-sm font-medium">{language === "ar" ? "الصفحة الحالية" : "Current Page"}</span>
+                    <div 
+                        onClick={navigateToQuran}
+                        className="col-span-2 sm:col-span-1 bg-gradient-to-br from-emerald-deep to-emerald-800 rounded-2xl p-4 text-white hover:shadow-lg transition-transform hover:scale-[1.02] cursor-pointer group"
+                    >
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 opacity-80">
+                                <BookOpen className="w-4 h-4" />
+                                <span className="text-sm font-medium">{language === "ar" ? "الصفحة الحالية" : "Current Page"}</span>
+                            </div>
+                            <ArrowRight className={`w-4 h-4 text-gold-matte transition-transform ${language === 'ar' ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
                         </div>
                         <div className="text-4xl font-bold mb-1">{khatma.currentPage}</div>
                         <div className="text-xs opacity-70">{language === "ar" ? `من ${TOTAL_QURAN_PAGES} صفحة` : `of ${TOTAL_QURAN_PAGES} pages`}</div>
@@ -254,7 +274,13 @@ export const KhatmaPlanner = () => {
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm font-medium text-emerald-deep">
                         <span>{progressPercentage}%</span>
-                        <span>{language === "ar" ? "مكتمل" : "Completed"}</span>
+                        <span 
+                            onClick={navigateToQuran}
+                            className="flex items-center gap-1 cursor-pointer hover:underline"
+                        >
+                            {language === "ar" ? "اذهب للمصحف" : "Go to Quran"}
+                            <ArrowRight className={`w-3 h-3 ${language === 'ar' ? 'rotate-180' : ''}`} />
+                        </span>
                     </div>
                     <Progress value={progressPercentage} className="h-3 bg-emerald-deep/10" />
                 </div>
